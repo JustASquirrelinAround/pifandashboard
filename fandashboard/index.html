@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fan Status Dashboard</title>
+  <link href="data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAbAAACnAUBJ98BAASnAAAAIwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAABxAAAC5DIEvf9FBP3/NwTP/wIACukAAAByAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABACAAm/IQKH/w4BSv8LAUP/HwKF/xMCWf8MAUX/IwKN/wMAF9EAAAAhAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGALAOt/0wF//8eAn3/HAJ6/zoE2P8kA5T/HgJ//0sE//81BMj/AQAEpwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA0j8E6v81BMv/BQEn/0ME9v9CBPX/RwT//xMCWv82BM3/RwT//wMBFN4AAAAAAAAAAAAAAAAAAAAAAAAARw4CSf8OAkz/AwEX/wUBJP8rA6b/QgT0/zMDxP8FAST/BQEp/x4CgP8LAUT9AAAAQwAAAAAAAAAAAAAAAAAAAaA9BOL/CgE//ykDo/9CBPX/JgOa/wUBKf8bAnP/PgTn/ywDrf8IATf/OwTc/wAAAZ0AAAAAAAAAAAAAAAAAAAGCMQO8/x0Cev8+BOT/QgTz/0ME+f8JATr/PATe/0IE9v9ABO7/IgOL/zMEw/8AAAGHAAAAAAAAAAAAAAAAAAAAFQMAFdMFASn/IwKO/0YE//88BOD/BAEd/zYEzf9HBP//KwOn/woBO/8EAR/aAAAAGwAAAAAAAAAAAAAAAAAAAAAAAABrJgOb/xsCdv8QAk//GgJw/xsCdf8hA4b/FgJl/yECh/8lA5j/AAAAZwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGwcANN83AM//DgBH/y8Ct/9LBP//OAPU/xQAWv81AMr/BgAt3gAAABYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAQC2AFEy/wRmTP8EBh7/DwBP/wQCHf8DWkX/AF81/wAEAMsAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/AHA2/wDIWP8AulD/AFId/wAGAP8APAv/AK9M/wDJWf8AjEL/AQMCrQAAAAAAAAAAAAAAAAAAAAAAAAAKAR8K6QDCXP8Aq1H/AJBF/wC6V/8ANRf/ALBQ/wCVRP8Ao0z/AMle/wBAHf8AAAAkAAAAAAAAAAAAAAAAAAAAGAEkDv8AoEv/AKlQ/wCvUf8AdDb/AAIBvwBcKf8ArFD/AKtR/wClT/8AQR7/AAAAPAAAAAAAAAAAAAAAAAAAAAIAAABSAQICngISBtMBBwS6AAAAbwAAAAQAAABXAQQDsQITB9MBBAOrAAAAZAAAAAkAAAAA/j8AAPwfAADwBwAA4AMAAOADAADgAwAAwAEAAMABAADgAwAA8AcAAPAHAADwBwAA8AMAAOADAADgAwAA8ccAAA==" rel="icon" type="image/x-icon">
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/bootstrap-icons.css" rel="stylesheet">
+  <script src="js/bootstrap.bundle.min.js"></script>
+  <script src="js/chart.js"></script>
+<style>
+.bg-purple-subtle {
+        background-color: #8C68CD;
+}
+canvas {
+  display: block;
+}
+body {
+        font-size: 1.2rem;
+}
+</style>
+</head>
+<body class="bg-dark text-white p-4">
+<div class="container position-relative">
+  <h1 class="mb-4"><i class="bi bi-speedometer2"></i> Raspberry Pi Fan Status</h1>
+  <div id="countdown-desktop" class="position-absolute top-0 end-0 d-none d-md-block" style="margin-right: 0.75rem;">
+   <div class="badge bg-info text-dark p-3 fs-6 shadow" style="width: 210px;">
+   <i class="bi bi-hourglass-split"></i> Next update in <span id="countdown-desktop-value">10</span>s
+   </div>
+  </div>
+  <div id="countdown-mobile" class="d-block d-md-none my-3">
+   <div class="badge bg-info text-dark p-2 fs-6 shadow" style="width: 200px;">
+    <i class="bi bi-hourglass-split"></i> Next update in <span id="countdown-mobile-value">10</span>s
+   </div>
+  </div>
+        <div class="card bg-secondary text-white shadow mb-4">
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Summary</h5>
+            <div id="summary-text" class="text-end">
+      <span class="badge bg-success me-2" id="online-count">
+        <i class="bi bi-check-circle me-1"></i>Online: 0
+      </span>
+      <span class="badge bg-danger me-2" id="offline-count">
+        <i class="bi bi-x-circle me-1"></i>Offline: 0
+      </span>
+      <span class="badge bg-dark" id="last-update">
+        <i class="bi bi-clock me-1"></i>Last update: --:--
+      </span>
+            </div>
+          </div>
+        </div>
+  <div id="fanStatus" class="row g-4"></div>
+</div>
+  <script src="js/script.js"></script>
+</body>
+</html>
