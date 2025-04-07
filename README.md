@@ -27,7 +27,7 @@ This project ties together:
 ┌────────────────────┐       ◀────────────◀─────────────┐
 │       Web UI       │ ───── polls every 10s ─────────▶ │
 └────────────────────┘                                 │
- fan-dashboard/                                        ▼
+ fandashboard/                                        ▼
                                         Multiple Raspberry Pis
 ```
 
@@ -151,7 +151,7 @@ dietpi-software install 85
 Move the dashboard folder into your web server root:
 
 ```bash
-sudo cp -r fan-dashboard/ /var/www/
+sudo cp -r fandashboard/ /var/www/
 ```
 
 ### 🔧 Nginx Configuration
@@ -163,7 +163,7 @@ server {
     listen 80 default_server;
     listen [::]:80 default_server;
 
-    root /var/www/fan-dashboard;
+    root /var/www/fandashboard;
     index index.html;
 
     server_name _;
