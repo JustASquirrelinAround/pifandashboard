@@ -1,0 +1,5 @@
+# Run this after InstallFanControl.sh
+# This adds the ability to monitor Fan Speed and Temp by just entering fanstatus in terminal window.
+
+echo "alias fanstatus='cat /var/log/fan_status.txt'" >> ~/.bashrc
+source ~/.bashrc
