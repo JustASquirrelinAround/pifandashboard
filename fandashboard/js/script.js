@@ -230,7 +230,7 @@ function createCard(pi) {
     : '<span class="status-dot" style="display:inline-block; width:12px; height:12px; background-color:#4be34b; border-radius:50%; margin-left:8px; vertical-align: middle;"></span>';
 
   const card = document.createElement("div");
-  card.className = "col-sm-12 col-md-6 col-lg-6";
+  card.className = `pi-card col-sm-12 col-md-6 ${useThreeCol ? "col-lg-4" : "col-lg-6"}`;
   card.id = `card-${safeId}`;
 
   card.innerHTML = `
@@ -297,6 +297,39 @@ function toggleChart(safeId, showChart) {
   }
 }
 
+// Check saved layout preference from localStorage (returns true if saved as "three")
+let useThreeCol = localStorage.getItem("cardLayout") === "three";
+
+// Apply the correct layout to all cards and update the toggle button
+function applyCardLayout() {
+  const cards = document.querySelectorAll(".pi-card");
+
+  cards.forEach(card => {
+    // Remove both possible col-lg classes first
+    card.classList.remove("col-lg-6", "col-lg-4");
+
+    // Add the appropriate one based on toggle state
+    card.classList.add(useThreeCol ? "col-lg-4" : "col-lg-6");
+  });
+
+  // Update the toggle button icon and label
+  const btn = document.getElementById("layoutToggleBtn");
+  btn.innerHTML = useThreeCol
+    ? '<i class="bi bi-grid-fill me-1"></i>Toggle 2 cards per row'   // current view = 3 → show option for 2
+    : '<i class="bi bi-grid-3x2-gap-fill me-1"></i>Toggle 3 cards per row';  // current view = 2 → show option for 3
+}
+
+// Toggle the layout mode and save it in localStorage
+function toggleCardLayout() {
+  useThreeCol = !useThreeCol;
+
+  // Save the preference for future page loads
+  localStorage.setItem("cardLayout", useThreeCol ? "three" : "two");
+
+  // Reapply layout changes to all cards and button
+  applyCardLayout();
+}
+
 // Main update cycle: fetch status, update cards
 async function updateStatus() {
   const results = await Promise.all(pis.map(fetchStatus));
@@ -326,3 +359,4 @@ async function updateStatus() {
 updateStatus();
 startCountdown();
 updateCountdownDisplay();
+applyCardLayout();
