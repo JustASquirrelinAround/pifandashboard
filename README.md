@@ -26,9 +26,9 @@ This project ties together:
        ▼
 ┌────────────────────┐       ◀────────────◀─────────────┐
 │       Web UI       │ ───── polls every 10s ─────────▶ │
-└────────────────────┘                                 │
- fandashboard/                                        ▼
-                                        Multiple Raspberry Pis
+└────────────────────┘                                  │
+ fandashboard/                                          ▼
+                                              Multiple Raspberry Pis
 ```
 
 ---
