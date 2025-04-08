@@ -262,7 +262,11 @@ function createCard(pi) {
             </div>
             <div class="w-25 d-flex flex-column align-items-center justify-content-center">
               <canvas id="multiChart-${safeId}" width="60" height="60" style="width:60px; height:60px;"></canvas>
-              <span class="badge bg-dark small mt-2"><i class="bi bi-hdd me-1"></i> CPU & Memory</span>
+              <span class="badge bg-dark small mt-2 text-center d-block">
+                <div><i class="bi bi-cpu-fill me-1"></i>CPU</div>
+                <hr class="mt-1 mb-1">
+                <div><i class="bi bi-memory me-1"></i>Memory</div>
+              </span>
             </div>
           </div>
         </div>
