@@ -17,18 +17,28 @@ This project ties together:
 
 ## 🧠 Architecture
 
+This project uses a modular design where each Raspberry Pi manages its own fan and exposes system stats via a local API. A centralized dashboard fetches these stats and presents them in real time.
+
 ```plaintext
- ┌──────────────┐
- │ Raspberry Pi │
- └─────┬────────┘
-       │ install_fan_control.sh
-       │ install_fan_api.sh (Flask)
-       ▼
-┌────────────────────┐       ◀────────────◀─────────────┐
-│       Web UI       │ ───── polls every 10s ─────────▶ │
-└────────────────────┘                                  │
- fandashboard/                                          ▼
-                                              Multiple Raspberry Pis
+┌────────────────────────────┐
+│   Raspberry Pi (per node)  │
+├────────────────────────────┤
+│ - Fan Controller           │ ← Python script (PWM based)
+│ - Monitors CPU temp        │
+│ - Sets fan PWM speed       │
+│ - Writes status file       │
+│ - Flask API Server         │ ← Serves /status JSON endpoint
+└────────────┬───────────────┘
+             │
+             ▼  (HTTP JSON request every 10s)
+┌────────────────────────────────────────────────────┐
+│          Web Dashboard (hosted on one Pi)          │
+├────────────────────────────────────────────────────┤
+│ - HTML + Bootstrap + Chart.js                      │
+│ - Polls each Pi for temperature, CPU, memory, fan  │
+│ - Displays history graph per Pi                    │
+│ - Mobile-friendly layout                           │
+└────────────────────────────────────────────────────┘
 ```
 
 ---
