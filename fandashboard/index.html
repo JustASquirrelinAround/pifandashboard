@@ -24,22 +24,27 @@
     <i class="bi bi-hourglass-split"></i> Next update in <span id="countdown-mobile-value">10</span>s
    </div>
   </div>
-        <div class="card bg-secondary text-white shadow mb-4">
-          <div class="card-body d-flex justify-content-between align-items-center">
-            <h5 class="card-title mb-0">Summary</h5>
-            <div id="summary-text" class="text-end">
-      <span class="badge bg-success me-2" id="online-count">
-        <i class="bi bi-check-circle me-1"></i>Online: 0
-      </span>
-      <span class="badge bg-danger me-2" id="offline-count">
-        <i class="bi bi-x-circle me-1"></i>Offline: 0
-      </span>
-      <span class="badge bg-dark" id="last-update">
-        <i class="bi bi-clock me-1"></i>Last update: --:--
-      </span>
-            </div>
+    <div class="card bg-secondary text-white shadow mb-4">
+      <div class="card-body d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">Summary</h5>
+        <div id="summary-text" class="text-end">
+          <span class="badge bg-success me-2" id="online-count">
+            <i class="bi bi-check-circle me-1"></i>Online: 0
+          </span>
+          <span class="badge bg-danger me-2" id="offline-count">
+            <i class="bi bi-x-circle me-1"></i>Offline: 0
+          </span>
+          <span class="badge bg-dark" id="last-update">
+            <i class="bi bi-clock me-1"></i>Last update: --:--
+          </span>
+          <div id="cardrowButton" class="d-flex justify-content-end">
+            <button class="btn btn-outline-light btn-sm d-none d-xl-inline-block" onclick="toggleCardLayout()" id="layoutToggleBtn">
+              <i class="bi bi-grid-3x2-gap-fill me-1"></i>Toggle 3 cards per row
+            </button>
           </div>
         </div>
+      </div>
+    </div>
   <div id="fanStatus" class="row g-4"></div>
 </div>
   <script src="js/script.js"></script>
