@@ -65,7 +65,6 @@ WantedBy=multi-user.target
 EOF
 
 # Reload systemd, enable and start the service
-systemctl daemon-reexec
 systemctl daemon-reload
 systemctl enable fanapi.service
 systemctl start fanapi.service
