@@ -1,0 +1,9 @@
+body {
+  font-size: 1.2rem;
+}
+canvas {
+  display: block;
+}
+.bg-purple-subtle {
+  background-color: #8C68CD;
+}
