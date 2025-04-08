@@ -62,7 +62,7 @@ cd pifandashboard
 This will give you access to:
 - `install_fan_control.sh`
 - `install_fan_api.sh`
-- `fan-dashboard/` folder containing the web interface
+- `fandashboard/` folder containing the web interface
 
 ---
 
@@ -225,6 +225,6 @@ MIT License. Free to use, modify, and contribute.
 ## 🙏 Credits
 
 - Fan control logic by [Michael Klements](https://www.the-diy-life.com/connecting-a-pwm-fan-to-a-raspberry-pi/)
-- Chart.js, Bootstrap, and DietPi for tools & ecosystem
+- Chart.js ([chartjs.org](https://www.chartjs.org/)), Bootstrap ([getbootstrap.com](https://getbootstrap.com/)), and DietPi ([dietpi.com](https://dietpi.com/)) for tools & ecosystem
 
 ---
