@@ -237,7 +237,7 @@ function createCard(pi) {
     <div class="card bg-secondary text-white shadow">
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <h5 class="card-title mb-0">${pi.name}</h5>
+          <h5 class="card-title mb-0"><i class="bi bi-motherboard"></i> ${pi.name}</h5>
           <div>
             <span class="badge bg-dark text-white"><i class="bi bi-hdd-network me-1"></i>${pi.ip}</span>
             ${statusDot}
