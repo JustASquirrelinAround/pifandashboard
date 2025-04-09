@@ -255,7 +255,12 @@ function createCard(pi) {
     <div class="card bg-secondary text-white shadow">
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <h5 class="card-title mb-0"><i class="bi bi-motherboard"></i> ${pi.name}</h5>
+          <h5 class="card-title mb-0 d-flex align-items-center gap-2">
+            <i class="bi bi-motherboard"></i> ${pi.name}
+            <button id="back-btn-${safeId}" class="btn btn-outline-light btn-sm d-none" onclick="toggleChart('${safeId}', false)">
+              <i class='bi bi-arrow-left'></i> Back
+            </button>
+          </h5>
           <div>
             <span class="badge bg-dark text-white"><i class="bi bi-hdd-network me-1"></i>${pi.ip}</span>
             ${statusDot}
@@ -289,7 +294,6 @@ function createCard(pi) {
           </div>
         </div>
         <div id="chartview-${safeId}" class="d-none">
-          <button class="btn btn-light btn-sm mb-3" onclick="toggleChart('${safeId}', false)"><i class='bi bi-arrow-left'></i> Back</button>
           <div class="bg-light rounded p-2">
             <canvas id="historyChart-${safeId}" height="200" style="max-height:200px"></canvas>
           </div>
@@ -305,13 +309,18 @@ function createCard(pi) {
 function toggleChart(safeId, showChart) {
   const overview = document.getElementById(`overview-${safeId}`);
   const chartview = document.getElementById(`chartview-${safeId}`);
-  if (!overview || !chartview) return;
+  const backBtn = document.getElementById(`back-btn-${safeId}`);
+
+  if (!overview || !chartview || !backBtn) return;
+
   if (showChart) {
     overview.classList.add("d-none");
     chartview.classList.remove("d-none");
+    backBtn.classList.remove("d-none"); // show back button
   } else {
     chartview.classList.add("d-none");
     overview.classList.remove("d-none");
+    backBtn.classList.add("d-none"); // hide back button
   }
 }
 
