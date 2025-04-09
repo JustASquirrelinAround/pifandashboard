@@ -1,3 +1,21 @@
+/*
+  Pi Fan Dashboard
+  https://github.com/JustASquirrelinAround/pifandashboard
+
+  Description:
+  A responsive, real-time dashboard to monitor Raspberry Pi CPU temperature,
+  fan PWM speed, memory, and CPU usage using data from a lightweight Flask API.
+
+  Technologies:
+  - Bootstrap 5 for layout
+  - Chart.js for graphs
+  - JavaScript (no frameworks)
+  - Designed for DietPi but adaptable
+
+  Author: JustASquirrelinAround
+  License: MIT
+*/
+
 // Define your Raspberry Pi devices with name and IP address
 const pis = [
   { name: "Pi 1", ip: "192.168.1.101" },
