@@ -62,7 +62,13 @@ A proportional PWM fan control script designed for 5V Noctua or similar fans usi
 
 ## 📥 Initial Setup (Clone Repo First)
 
-Start by cloning this repository to your Pi:
+Start by checking git is installed
+```bash
+sudo apt update
+sudo apt install git
+```
+
+Then clone this repository to your Pi:
 
 ```bash
 git clone https://github.com/JustASquirrelinAround/pifandashboard.git
