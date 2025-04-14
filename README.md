@@ -13,7 +13,7 @@ This project ties together:
 
 > ✅ This setup is designed for **DietPi**, but should also work with **Raspberry Pi OS** with some manual adjustments (not currently documented).
 
-> 🛑 NOTE: Designed for Raspberry Pi 3B (including 3B+) and 4B, will NOT work with Pi 5 as this time.
+> 🛑 NOTE: Designed for **Raspberry Pi 3B** (including **3B+**) and **4B**, will <ins>**NOT**</ins> work with **Raspberry Pi 5** if you are using the fan header.
 
 ---
 
