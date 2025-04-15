@@ -492,14 +492,13 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   if (modal) {
     modal.addEventListener("shown.bs.modal", () => {
-      loadPiList(); // Refresh the Pi list from Flask API
+      loadPiList().then(populatePiModalList); // Refresh the list and render
 
       const addBtn = document.getElementById("addPiButton");
       const nameInput = document.getElementById("piNameInput");
       const ipInput = document.getElementById("piIpInput");
 
       if (addBtn) {
-        // Remove any previous listener first to avoid stacking
         addBtn.replaceWith(addBtn.cloneNode(true));
         document.getElementById("addPiButton").addEventListener("click", async () => {
           const newPi = {
@@ -513,17 +512,23 @@ window.addEventListener("DOMContentLoaded", async () => {
           }
 
           try {
-            const response = await fetch("http://<your_pi_ip>:10001/add_pi", {
+            const response = await fetch(`http://${window.location.hostname}:${flaskPort}/add_pi`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(newPi)
             });
 
+            if (response.status === 409) {
+              alert("This IP is already in the list.");
+              return;
+            }
+
             if (!response.ok) throw new Error("Failed to add Pi");
 
             nameInput.value = "";
             ipInput.value = "";
-            await loadPiList(); // Refresh list
+            await loadPiList();
+            populatePiModalList(); // Update modal list view
           } catch (err) {
             console.error("Add Pi Error:", err);
             alert("Unable to add Pi.");
@@ -531,7 +536,6 @@ window.addEventListener("DOMContentLoaded", async () => {
         });
       }
 
-      // Delegate delete events
       const piListEl = document.getElementById("piList");
       if (piListEl) {
         piListEl.replaceWith(piListEl.cloneNode(true));
@@ -540,7 +544,7 @@ window.addEventListener("DOMContentLoaded", async () => {
             const ip = e.target.closest(".delete-pi-btn").getAttribute("data-ip");
 
             try {
-              const response = await fetch("http://<your_pi_ip>:10001/delete_pi", {
+              const response = await fetch(`http://${window.location.hostname}:${flaskPort}/delete_pi`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ ip })
@@ -548,6 +552,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
               if (!response.ok) throw new Error("Failed to delete Pi");
               await loadPiList();
+              populatePiModalList(); // Refresh visible list
             } catch (err) {
               console.error("Delete Pi Error:", err);
               alert("Unable to delete Pi.");
