@@ -16,15 +16,96 @@
   License: MIT
 */
 
-// Define your Raspberry Pi devices with name and IP address
-const pis = [
-  { name: "Pi 1", ip: "192.168.1.101" },
-  { name: "Pi 2", ip: "192.168.1.102" },
-  { name: "Pi 3", ip: "192.168.1.103" },
-  { name: "Pi 4", ip: "192.168.1.104" },
-  { name: "Pi 5", ip: "192.168.1.105" }
-  // Add more or remove some as needed
-];
+let pis = []; // Global pis list for dashboard
+
+// Load Pis from Flask JSON endpoint
+async function loadPiList() {
+  try {
+    const response = await fetch("/get_pi_list");
+    const data = await response.json();
+    pis = data;
+    populatePiModalList();
+  } catch (err) {
+    console.error("Failed to load Pis:", err);
+  }
+}
+
+// Add a Pi via POST
+async function addPi() {
+  const nameInput = document.getElementById("piNameInput");
+  const ipInput = document.getElementById("piIpInput");
+
+  const newPi = {
+    name: nameInput.value.trim(),
+    ip: ipInput.value.trim()
+  };
+
+  if (!newPi.name || !newPi.ip) {
+    alert("Please enter both a name and IP address.");
+    return;
+  }
+
+  try {
+    const response = await fetch("/add_pi", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newPi)
+    });
+
+    if (!response.ok) throw new Error("Failed to add Pi");
+
+    // Reload list from backend
+    await loadPiList();
+
+    // Clear inputs
+    nameInput.value = "";
+    ipInput.value = "";
+  } catch (err) {
+    console.error("Add Pi Error:", err);
+    alert("Unable to add Pi.");
+  }
+}
+
+// Delete a Pi by index
+async function deletePi(index) {
+  const pi = pis[index];
+
+  try {
+    const response = await fetch("/delete_pi", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(pi)
+    });
+
+    if (!response.ok) throw new Error("Failed to delete Pi");
+
+    await loadPiList(); // Refresh list
+  } catch (err) {
+    console.error("Delete Pi Error:", err);
+    alert("Unable to delete Pi.");
+  }
+}
+
+// Render modal list of Pis
+function populatePiModalList() {
+  const list = document.getElementById("pi-list");
+  list.innerHTML = "";
+
+  pis.forEach((pi, index) => {
+    const li = document.createElement("li");
+    li.className = "list-group-item d-flex justify-content-between align-items-center";
+    li.innerHTML = `
+      <span><strong>${pi.name}</strong> (${pi.ip})</span>
+      <button class="btn btn-sm btn-danger" onclick="deletePi(${index})">
+        <i class="bi bi-trash"></i>
+      </button>
+    `;
+    list.appendChild(li);
+  });
+}
+
+// Refresh Pis every time the modal opens
+document.getElementById("addPiModal").addEventListener("show.bs.modal", loadPiList);
 
 const refreshInterval = 10;
 let countdown = refreshInterval;
@@ -398,7 +479,13 @@ async function updateStatus() {
   document.getElementById("last-update").innerHTML = `<i class="bi bi-clock me-1"></i>Last update: ${new Date().toLocaleTimeString()}`;
 }
 
-updateStatus();
-startCountdown();
-updateCountdownDisplay();
-applyCardLayout();
+// Initial load of Pis so dashboard can use them
+window.addEventListener("DOMContentLoaded", async () => {
+  await loadPiList();
+
+  // Now pis[] is ready — you can run updateStatus or any logic that needs pis
+  updateStatus(); // <-- assuming this is your dashboard init function
+  startCountdown(); // if using countdown
+  updateCountdownDisplay();
+  applyCardLayout(); // if you're using dynamic layout switching
+});
