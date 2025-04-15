@@ -489,7 +489,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   applyCardLayout();
 
   // Now safe to add these because DOM is loaded
-  document.getElementById("addPiButton").addEventListener("click", addPi);
+  // document.getElementById("addPiButton").addEventListener("click", addPi);
   document.getElementById("piManagerModal").addEventListener("shown.bs.modal", loadPiList);
   document.getElementById("piList").addEventListener("click", function (e) {
     if (e.target.closest(".delete-pi-btn")) {
