@@ -31,21 +31,6 @@ async function loadPiList() {
   }
 }
 
-// Add event listener for Add Pi button
-document.getElementById("addPiButton").addEventListener("click", addPi);
-
-// When modal is opened, load the current list
-const piModal = document.getElementById('piManagerModal');
-piModal.addEventListener('shown.bs.modal', loadPiList);
-
-// Delegate delete clicks inside the list
-document.getElementById("piList").addEventListener("click", function (e) {
-  if (e.target.closest(".delete-pi-btn")) {
-    const ip = e.target.closest(".delete-pi-btn").getAttribute("data-ip");
-    deletePi(ip);
-  }
-});
-
 // Add a Pi via POST
 async function addPi() {
   const nameInput = document.getElementById("piNameInput");
@@ -498,10 +483,18 @@ async function updateStatus() {
 // Initial load of Pis so dashboard can use them
 window.addEventListener("DOMContentLoaded", async () => {
   await loadPiList();
-
-  // Now pis[] is ready — you can run updateStatus or any logic that needs pis
-  updateStatus(); // <-- assuming this is your dashboard init function
-  startCountdown(); // if using countdown
+  updateStatus();
+  startCountdown();
   updateCountdownDisplay();
-  applyCardLayout(); // if you're using dynamic layout switching
+  applyCardLayout();
+
+  // Now safe to add these because DOM is loaded
+  document.getElementById("addPiButton").addEventListener("click", addPi);
+  document.getElementById("piManagerModal").addEventListener("shown.bs.modal", loadPiList);
+  document.getElementById("piList").addEventListener("click", function (e) {
+    if (e.target.closest(".delete-pi-btn")) {
+      const ip = e.target.closest(".delete-pi-btn").getAttribute("data-ip");
+      deletePi(ip);
+    }
+  });
 });
