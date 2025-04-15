@@ -109,14 +109,15 @@
               <input type="text" class="form-control" id="piNameInput" placeholder="Pi Name">
             </div>
             <div class="col-md-6">
-              <input type="text" class="form-control" id="piIpInput" placeholder="IP Address">
+              <input type="text" id="piIpInput" class="form-control" placeholder="192.168.1.10" pattern="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}$" required>
             </div>
           </div>
           <div class="text-end mb-3">
-            <button id="addPiButton" class="btn btn-outline-success btn-sm">
+            <button id="addPiButton" class="btn btn-success btn-sm">
               <i class="bi bi-plus-circle me-1"></i>Add Pi
             </button>
           </div>
+          <div id="piAlert" class="alert d-none" role="alert"></div>
 
           <!-- Existing Pi List (populated dynamically) -->
           <div id="piListDisplay" class="list-group">
