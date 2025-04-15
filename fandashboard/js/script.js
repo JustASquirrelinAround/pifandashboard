@@ -59,12 +59,12 @@ async function addPi() {
   const nameInput = document.getElementById("piNameInput");
   const ipInput = document.getElementById("piIpInput");
   const alertDiv = document.getElementById("piAlert");
-  const flaskPort = 10001; // Make sure this matches your Flask pi_manager port
+  const flaskPort = 10001;
 
   const name = nameInput.value.trim();
   const ip = ipInput.value.trim();
 
-  // Clear alert
+  // Clear alert and hide it initially
   alertDiv.classList.add("d-none");
   alertDiv.textContent = "";
 
@@ -82,12 +82,12 @@ async function addPi() {
   try {
     const fanCheck = await fetch(`http://${ip}:10000/status`, { method: "GET" });
     if (fanCheck.ok) apiReachable = true;
-  } catch (_) {
-    apiReachable = false;
+  } catch (err) {
+    // Log for debugging
+    console.warn("Fan API not reachable:", err);
   }
 
   try {
-    // Attempt to add via Flask
     const response = await fetch(`http://${window.location.hostname}:${flaskPort}/add_pi`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -100,23 +100,24 @@ async function addPi() {
       throw new Error(result.error || "Failed to add Pi.");
     }
 
-    // If success, show success alert
+    // Show success/failure alert
     alertDiv.className = "alert alert-success";
     alertDiv.textContent = apiReachable
       ? `Pi "${name}" added and reachable.`
-      : `Pi "${name}" added but fan API not reachable.`;
+      : `Pi "${name}" added, but the fan API was not reachable.`;
     alertDiv.classList.remove("d-none");
 
     // Clear inputs
     nameInput.value = "";
     ipInput.value = "";
 
-    // Trigger update to refresh cards
-    await updateStatus();
+    // Force reload Pis and re-render dashboard and modal list
+    await loadPiList();   // This updates `pis[]` and list in modal
+    await updateStatus(); // This redraws cards
 
   } catch (err) {
     alertDiv.className = "alert alert-danger";
-    alertDiv.textContent = err.message;
+    alertDiv.textContent = err.message || "Unexpected error while adding Pi.";
     alertDiv.classList.remove("d-none");
   }
 }
