@@ -17,11 +17,12 @@
 */
 
 let pis = []; // Global pis list for dashboard
+const flaskPort = 10001; // Port your Flask Pi Manager API is running on
 
 // Load Pis from Flask JSON endpoint
 async function loadPiList() {
   try {
-    const response = await fetch("/get_pi_list");
+    const response = await fetch(`http://${window.location.hostname}:${flaskPort}/get_pi_list`);
     const data = await response.json();
     pis = data;
     populatePiModalList();
@@ -39,8 +40,8 @@ piModal.addEventListener('shown.bs.modal', loadPiList);
 
 // Delegate delete clicks inside the list
 document.getElementById("piList").addEventListener("click", function (e) {
-  if (e.target && e.target.classList.contains("delete-pi-btn")) {
-    const ip = e.target.getAttribute("data-ip");
+  if (e.target.closest(".delete-pi-btn")) {
+    const ip = e.target.closest(".delete-pi-btn").getAttribute("data-ip");
     deletePi(ip);
   }
 });
@@ -61,7 +62,7 @@ async function addPi() {
   }
 
   try {
-    const response = await fetch("/add_pi", {
+    const response = await fetch(`http://${window.location.hostname}:${flaskPort}/add_pi`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newPi)
@@ -69,10 +70,7 @@ async function addPi() {
 
     if (!response.ok) throw new Error("Failed to add Pi");
 
-    // Reload list from backend
-    await loadPiList();
-
-    // Clear inputs
+    await loadPiList(); // Reload list after adding
     nameInput.value = "";
     ipInput.value = "";
   } catch (err) {
@@ -81,20 +79,18 @@ async function addPi() {
   }
 }
 
-// Delete a Pi by index
-async function deletePi(index) {
-  const pi = pis[index];
-
+// Delete a Pi
+async function deletePi(ip) {
   try {
-    const response = await fetch("/delete_pi", {
+    const response = await fetch(`http://${window.location.hostname}:${flaskPort}/delete_pi`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(pi)
+      body: JSON.stringify({ ip })
     });
 
     if (!response.ok) throw new Error("Failed to delete Pi");
 
-    await loadPiList(); // Refresh list
+    await loadPiList(); // Refresh list after deletion
   } catch (err) {
     console.error("Delete Pi Error:", err);
     alert("Unable to delete Pi.");
@@ -103,15 +99,15 @@ async function deletePi(index) {
 
 // Render modal list of Pis
 function populatePiModalList() {
-  const list = document.getElementById("pi-list");
+  const list = document.getElementById("piList");
   list.innerHTML = "";
 
-  pis.forEach((pi, index) => {
+  pis.forEach((pi) => {
     const li = document.createElement("li");
     li.className = "list-group-item d-flex justify-content-between align-items-center";
     li.innerHTML = `
       <span><strong>${pi.name}</strong> (${pi.ip})</span>
-      <button class="btn btn-sm btn-danger" data-ip="${pi.ip}">
+      <button class="btn btn-sm btn-danger delete-pi-btn" data-ip="${pi.ip}">
         <i class="bi bi-trash"></i>
       </button>
     `;
