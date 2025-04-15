@@ -151,23 +151,25 @@ async function addPi() {
   }
 }
 
-// Helper to show alert with optional persistent mode
 function showAlert(message, type = "success", persistent = false) {
   const alertBox = document.getElementById("piAlert");
+  if (!alertBox) return;
+
   alertBox.className = `alert alert-${type} mt-2`;
   alertBox.innerHTML = persistent
     ? `${message} <button type="button" class="btn-close float-end" data-bs-dismiss="alert" aria-label="Close"></button>`
     : message;
+
   alertBox.classList.remove("d-none");
 
   if (!persistent) {
-    setTimeout(clearAlert, 5000); // Auto-dismiss after 5s
+    setTimeout(clearAlert, 5000); // Auto-dismiss
   }
 }
 
-// Helper to clear/hide alert
 function clearAlert() {
   const alertBox = document.getElementById("piAlert");
+  if (!alertBox) return; // avoid error if not found
   alertBox.className = "alert d-none";
   alertBox.innerHTML = "";
 }
