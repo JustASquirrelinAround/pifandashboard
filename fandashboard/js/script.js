@@ -87,7 +87,7 @@ async function addPi() {
   }
 
   try {
-    const response = await fetch("/add_pi", {
+    const response = await fetch("http://${window.location.hostname}:${flaskPort}/add_pi", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newPi)
