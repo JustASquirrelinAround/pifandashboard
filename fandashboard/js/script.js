@@ -54,39 +54,57 @@ function renderPiList() {
   });
 }
 
-// Add a new Pi
+// Utility: Fetch with timeout (default 2000ms)
+async function fetchWithTimeout(resource, { timeout = 2000, ...options } = {}) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(resource, {
+      ...options,
+      signal: controller.signal
+    });
+    clearTimeout(id);
+    return response;
+  } catch (err) {
+    clearTimeout(id);
+    throw err;
+  }
+}
+
+// Main Add Pi function
 async function addPi() {
   const nameInput = document.getElementById("piNameInput");
   const ipInput = document.getElementById("piIpInput");
-  const alertDiv = document.getElementById("piAlert");
-  const flaskPort = 10001;
+  const alertBox = document.getElementById("piAlert");
 
   const name = nameInput.value.trim();
   const ip = ipInput.value.trim();
 
-  // Clear alert and hide it initially
-  alertDiv.classList.add("d-none");
-  alertDiv.textContent = "";
+  // Reset alert
+  alertBox.className = "alert d-none";
+  alertBox.innerText = "";
 
-  // Validate IP with regex
-  const ipRegex = /^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}$/;
-  if (!name || !ipRegex.test(ip)) {
-    alertDiv.className = "alert alert-danger";
-    alertDiv.textContent = "Please enter a valid name and IP address.";
-    alertDiv.classList.remove("d-none");
+  if (!name || !ip) {
+    alertBox.className = "alert alert-warning";
+    alertBox.innerText = "Please enter both a name and IP address.";
     return;
   }
 
   // Check if the fan API is reachable
   let apiReachable = false;
   try {
-    const fanCheck = await fetch(`http://${ip}:10000/status`, { method: "GET" });
-    if (fanCheck.ok) apiReachable = true;
+    const fanCheck = await fetchWithTimeout(`http://${ip}:10000/status`, { timeout: 2000 });
+    if (fanCheck.ok) {
+      apiReachable = true;
+    } else {
+      console.warn(`Fan API responded but not OK: ${fanCheck.status}`);
+    }
   } catch (err) {
-    // Log for debugging
-    console.warn("Fan API not reachable:", err);
+    console.warn("Fan API unreachable or timed out:", err);
   }
 
+  // POST to add_pi regardless of reachability (UI will reflect error state)
   try {
     const response = await fetch(`http://${window.location.hostname}:${flaskPort}/add_pi`, {
       method: "POST",
@@ -94,31 +112,32 @@ async function addPi() {
       body: JSON.stringify({ name, ip })
     });
 
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.error || "Failed to add Pi.");
+    if (response.status === 409) {
+      alertBox.className = "alert alert-danger";
+      alertBox.innerText = "That Pi IP already exists.";
+      return;
     }
 
-    // Show success/failure alert
-    alertDiv.className = "alert alert-success";
-    alertDiv.textContent = apiReachable
-      ? `Pi "${name}" added and reachable.`
-      : `Pi "${name}" added, but the fan API was not reachable.`;
-    alertDiv.classList.remove("d-none");
+    if (!response.ok) throw new Error("Failed to add Pi");
 
     // Clear inputs
     nameInput.value = "";
     ipInput.value = "";
 
-    // Force reload Pis and re-render dashboard and modal list
-    await loadPiList();   // This updates `pis[]` and list in modal
-    await updateStatus(); // This redraws cards
+    // Show success
+    alertBox.className = apiReachable ? "alert alert-success" : "alert alert-warning";
+    alertBox.innerText = apiReachable
+      ? "Pi added and reachable."
+      : "Pi added but not reachable (offline or fan API unavailable).";
+
+    // Reload list and trigger update
+    await loadPiList();
+    await updateStatus(); // Refresh cards
 
   } catch (err) {
-    alertDiv.className = "alert alert-danger";
-    alertDiv.textContent = err.message || "Unexpected error while adding Pi.";
-    alertDiv.classList.remove("d-none");
+    console.error("Add Pi Error:", err);
+    alertBox.className = "alert alert-danger";
+    alertBox.innerText = "Failed to add Pi due to an unexpected error.";
   }
 }
 
