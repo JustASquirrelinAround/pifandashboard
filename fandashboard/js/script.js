@@ -59,72 +59,64 @@ async function addPi() {
   const nameInput = document.getElementById("piNameInput");
   const ipInput = document.getElementById("piIpInput");
   const alertDiv = document.getElementById("piAlert");
+  const flaskPort = 10001; // Make sure this matches your Flask pi_manager port
 
-  const newPi = {
-    name: nameInput.value.trim(),
-    ip: ipInput.value.trim()
-  };
+  const name = nameInput.value.trim();
+  const ip = ipInput.value.trim();
 
-  // Clear any previous alert
+  // Clear alert
   alertDiv.classList.add("d-none");
+  alertDiv.textContent = "";
 
-  // Validate inputs
+  // Validate IP with regex
   const ipRegex = /^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}$/;
-  if (!newPi.name || !ipRegex.test(newPi.ip)) {
+  if (!name || !ipRegex.test(ip)) {
     alertDiv.className = "alert alert-danger";
     alertDiv.textContent = "Please enter a valid name and IP address.";
     alertDiv.classList.remove("d-none");
     return;
   }
 
-  // Try to ping the fan API
+  // Check if the fan API is reachable
   let apiReachable = false;
   try {
-    const check = await fetch(`http://${newPi.ip}:10000/status`, { method: "GET", timeout: 2000 });
-    apiReachable = check.ok;
-  } catch (err) {
+    const fanCheck = await fetch(`http://${ip}:10000/status`, { method: "GET" });
+    if (fanCheck.ok) apiReachable = true;
+  } catch (_) {
     apiReachable = false;
   }
 
   try {
-    const response = await fetch("http://${window.location.hostname}:${flaskPort}/add_pi", {
+    // Attempt to add via Flask
+    const response = await fetch(`http://${window.location.hostname}:${flaskPort}/add_pi`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newPi)
+      body: JSON.stringify({ name, ip })
     });
 
+    const result = await response.json();
+
     if (!response.ok) {
-      const errData = await response.json();
-      throw new Error(errData.error || "Unknown error");
+      throw new Error(result.error || "Failed to add Pi.");
     }
 
-    // If the card already exists, remove it to replace with updated one
-    const existingCard = document.getElementById(`card-${sanitizeId(newPi.ip)}`);
-    if (existingCard) existingCard.remove();
-
-    // Add to local pis list (optional, depends how you're storing them)
-    pis.push(newPi);
-
-    // Recreate card with temporary error badge if not reachable
-    if (!apiReachable) {
-      newPi.data = { error: "Unavailable" }; // simulate error for styling
-    } else {
-      newPi.data = await fetchStatus(newPi).then(res => res.data);
-    }
-
-    createCard(newPi);
-    updateSummary();
-
+    // If success, show success alert
     alertDiv.className = "alert alert-success";
-    alertDiv.textContent = `Pi "${newPi.name}" added ${apiReachable ? "successfully" : "(but not reachable right now)"}`;
+    alertDiv.textContent = apiReachable
+      ? `Pi "${name}" added and reachable.`
+      : `Pi "${name}" added but fan API not reachable.`;
     alertDiv.classList.remove("d-none");
 
-    // Reset form
+    // Clear inputs
     nameInput.value = "";
     ipInput.value = "";
+
+    // Trigger update to refresh cards
+    await updateStatus();
+
   } catch (err) {
     alertDiv.className = "alert alert-danger";
-    alertDiv.textContent = `Error adding Pi: ${err.message}`;
+    alertDiv.textContent = err.message;
     alertDiv.classList.remove("d-none");
   }
 }
