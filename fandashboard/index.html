@@ -46,20 +46,25 @@
    </div>
   </div>
     <div class="card bg-secondary text-white shadow mb-4">
-      <div class="card-body d-flex justify-content-between align-items-center">
-        <h5 class="card-title mb-0">Summary</h5>
-        <div id="summary-text" class="text-end">
-          <span class="badge bg-success me-2" id="online-count">
-            <i class="bi bi-check-circle me-1"></i>Online: 0
-          </span>
-          <span class="badge bg-danger me-2" id="offline-count">
-            <i class="bi bi-x-circle me-1"></i>Offline: 0
-          </span>
-          <span class="badge bg-dark" id="last-update">
-            <i class="bi bi-clock me-1"></i>Last update: --:--
-          </span>
-          <div id="cardrowButton" class="d-flex justify-content-end">
-            <button class="btn btn-outline-light btn-sm d-none d-xl-inline-block" onclick="toggleCardLayout()" id="layoutToggleBtn">
+      <div class="card-body">
+        <!-- Top row: Summary title + badges -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center">
+          <div class="d-flex align-items-center flex-wrap gap-2">
+            <h5 class="card-title mb-0 me-1"><i class="bi bi-info-circle"></i> Summary</h5>
+            <span class="badge bg-success" id="online-count">
+              <i class="bi bi-check-circle me-1"></i>Online: 0
+            </span>
+            <span class="badge bg-danger" id="offline-count">
+              <i class="bi bi-x-circle me-1"></i>Offline: 0
+            </span>
+            <span class="badge bg-dark" id="last-update">
+              <i class="bi bi-clock me-1"></i>Last update: --:--
+            </span>
+          </div>
+
+          <!-- Button aligned to end -->
+          <div id="cardrowButton" class="d-none d-xl-block">
+            <button class="btn btn-outline-light btn-sm" onclick="toggleCardLayout()" id="layoutToggleBtn">
               <i class="bi bi-grid-3x2-gap-fill me-1"></i>Toggle 3 cards per row
             </button>
           </div>
