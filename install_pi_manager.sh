@@ -1,9 +1,5 @@
 #!/bin/bash
 
-echo "Installing required packages for Flask Pi Manager API..."
-apt update
-apt install -y python3-flask python3-flask-cors
-
 echo "Creating Pi Manager Flask API script..."
 
 # Create the Python script in /mnt/dietpi_userdata
