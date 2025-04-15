@@ -37,8 +37,20 @@ function renderPiList() {
   list.innerHTML = ""; // Clear previous
 
   pis.forEach(pi => {
+    const safeId = sanitizeId(pi.ip);
+
+    // Check if the related dashboard card has a danger background (offline)
+    const cardHeader = document.querySelector(`#card-${safeId} .card-header`);
+    const isOffline = cardHeader?.classList.contains("bg-danger");
+
     const item = document.createElement("div");
-    item.className = "list-group-item d-flex justify-content-between align-items-center bg-secondary text-white mb-2 rounded";
+    item.className = "list-group-item d-flex justify-content-between align-items-center mb-2 rounded";
+
+    if (isOffline) {
+      item.classList.add("bg-warning", "text-dark");
+    } else {
+      item.classList.add("bg-secondary", "text-white");
+    }
 
     item.innerHTML = `
       <span><strong>${pi.name}</strong> (${pi.ip})</span>
@@ -53,6 +65,7 @@ function renderPiList() {
     list.appendChild(item);
   });
 }
+
 
 // Utility: Fetch with timeout (default 2000ms)
 async function fetchWithTimeout(resource, { timeout = 2000, ...options } = {}) {
