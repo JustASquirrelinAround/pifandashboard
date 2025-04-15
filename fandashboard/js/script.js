@@ -30,6 +30,21 @@ async function loadPiList() {
   }
 }
 
+// Add event listener for Add Pi button
+document.getElementById("addPiButton").addEventListener("click", addPi);
+
+// When modal is opened, load the current list
+const piModal = document.getElementById('piManagerModal');
+piModal.addEventListener('shown.bs.modal', loadPiList);
+
+// Delegate delete clicks inside the list
+document.getElementById("piList").addEventListener("click", function (e) {
+  if (e.target && e.target.classList.contains("delete-pi-btn")) {
+    const ip = e.target.getAttribute("data-ip");
+    deletePi(ip);
+  }
+});
+
 // Add a Pi via POST
 async function addPi() {
   const nameInput = document.getElementById("piNameInput");
@@ -96,7 +111,7 @@ function populatePiModalList() {
     li.className = "list-group-item d-flex justify-content-between align-items-center";
     li.innerHTML = `
       <span><strong>${pi.name}</strong> (${pi.ip})</span>
-      <button class="btn btn-sm btn-danger" onclick="deletePi(${index})">
+      <button class="btn btn-sm btn-danger" data-ip="${pi.ip}">
         <i class="bi bi-trash"></i>
       </button>
     `;
