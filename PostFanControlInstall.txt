@@ -1,3 +1,5 @@
+# This is just a backup for the instructions in README.md
+
 # Run this after install_fan_control.sh
 # This adds the ability to monitor Fan Speed and Temp by just entering fanstatus in terminal window.
 
