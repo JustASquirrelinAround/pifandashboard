@@ -601,9 +601,9 @@ async function updateStatus() {
 window.addEventListener("DOMContentLoaded", async () => {
   await loadPiList();
 
-  // Now pis[] is ready — you can run updateStatus or any logic that needs pis
-  updateStatus(); // <-- assuming this is your dashboard init function
-  startCountdown(); // if using countdown
+  // Now pis[] is ready - and further logic can run
+  updateStatus();
+  startCountdown();
   updateCountdownDisplay();
-  applyCardLayout(); // if you're using dynamic layout switching
+  applyCardLayout();
 });
