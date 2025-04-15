@@ -44,9 +44,6 @@
         <div class="badge bg-info text-dark p-3 fs-6 shadow" style="width: 210px;">
           <i class="bi bi-hourglass-split"></i> Next update in <span id="countdown-desktop-value">10</span>s
         </div>
-        <button class="btn btn-outline-warning btn-sm" onclick="openPiModal()">
-          <i class="bi bi-pencil-square me-1"></i>Edit Pi List
-        </button>
       </div>
     </div>
     <div id="countdown-mobile" class="d-block d-md-none my-3">
@@ -54,9 +51,6 @@
         <i class="bi bi-hourglass-split"></i> Next update in <span id="countdown-mobile-value">10</span>s
       </div>
       <div class="mt-2 text-end">
-        <button class="btn btn-outline-warning btn-sm" onclick="openPiModal()">
-          <i class="bi bi-pencil-square me-1"></i>Edit Pi List
-        </button>
       </div>
     </div>
     <div class="card bg-secondary text-white shadow mb-4">
@@ -74,6 +68,9 @@
             <span class="badge bg-dark" id="last-update">
               <i class="bi bi-clock me-1"></i>Last update: --:--
             </span>
+            <button class="btn btn-outline-light btn-sm" onclick="openPiModal()">
+              <i class="bi bi-pencil-square me-1"></i>Edit Pi List
+            </button>
           </div>
 
           <!-- Button aligned to end -->

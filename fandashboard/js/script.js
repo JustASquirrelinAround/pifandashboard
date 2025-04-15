@@ -16,6 +16,11 @@
   License: MIT
 */
 
+function openPiModal() {
+  const modal = new bootstrap.Modal(document.getElementById('piListModal'));
+  modal.show();
+}
+
 // Define your Raspberry Pi devices with name and IP address
 const pis = [
   { name: "Pi 1", ip: "192.168.1.101" },
