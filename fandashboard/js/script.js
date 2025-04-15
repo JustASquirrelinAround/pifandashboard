@@ -94,13 +94,11 @@ async function addPi() {
   const name = nameInput.value.trim();
   const ip = ipInput.value.trim();
 
-  // Reset alert
-  alertBox.className = "alert d-none";
-  alertBox.innerText = "";
+  // Clear and hide alert initially
+  clearAlert();
 
   if (!name || !ip) {
-    alertBox.className = "alert alert-warning";
-    alertBox.innerText = "Please enter both a name and IP address.";
+    showAlert("Please enter both a name and IP address.", "warning", true);
     return;
   }
 
@@ -126,8 +124,7 @@ async function addPi() {
     });
 
     if (response.status === 409) {
-      alertBox.className = "alert alert-danger";
-      alertBox.innerText = "That Pi IP already exists.";
+      showAlert("That Pi IP already exists.", "danger", true);
       return;
     }
 
@@ -137,21 +134,42 @@ async function addPi() {
     nameInput.value = "";
     ipInput.value = "";
 
-    // Show success
-    alertBox.className = apiReachable ? "alert alert-success" : "alert alert-warning";
-    alertBox.innerText = apiReachable
-      ? "Pi added and reachable."
-      : "Pi added but not reachable (offline or fan API unavailable).";
+    // Show success or warning
+    if (apiReachable) {
+      showAlert("Pi added and reachable.", "success");
+    } else {
+      showAlert("Pi added but not reachable (offline or fan API unavailable).", "warning");
+    }
 
-    // Reload list and trigger update
+    // Reload list and update cards
     await loadPiList();
-    await updateStatus(); // Refresh cards
+    await updateStatus();
 
   } catch (err) {
     console.error("Add Pi Error:", err);
-    alertBox.className = "alert alert-danger";
-    alertBox.innerText = "Failed to add Pi due to an unexpected error.";
+    showAlert("Failed to add Pi due to an unexpected error.", "danger", true);
   }
+}
+
+// Helper to show alert with optional persistent mode
+function showAlert(message, type = "success", persistent = false) {
+  const alertBox = document.getElementById("piAlert");
+  alertBox.className = `alert alert-${type} mt-2`;
+  alertBox.innerHTML = persistent
+    ? `${message} <button type="button" class="btn-close float-end" data-bs-dismiss="alert" aria-label="Close"></button>`
+    : message;
+  alertBox.classList.remove("d-none");
+
+  if (!persistent) {
+    setTimeout(clearAlert, 5000); // Auto-dismiss after 5s
+  }
+}
+
+// Helper to clear/hide alert
+function clearAlert() {
+  const alertBox = document.getElementById("piAlert");
+  alertBox.className = "alert d-none";
+  alertBox.innerHTML = "";
 }
 
 // Delete Pi by IP
