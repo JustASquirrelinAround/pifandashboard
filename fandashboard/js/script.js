@@ -26,7 +26,7 @@ async function loadPiList() {
     const response = await fetch(`http://${window.location.hostname}:${flaskPort}/get_pi_list`);
     const data = await response.json();
     pis = data;
-    renderPiList
+    renderPiList();
   } catch (err) {
     console.error("Failed to load Pi list:", err);
   }
