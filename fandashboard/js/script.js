@@ -25,11 +25,26 @@ async function loadPiList() {
     const response = await fetch(`http://${window.location.hostname}:${flaskPort}/get_pi_list`);
     const data = await response.json();
     pis = data;
-    // populatePiModalList();
+    populatePiModalList();
   } catch (err) {
     console.error("Failed to load Pis:", err);
   }
 }
+
+// Add event listener for Add Pi button
+document.getElementById("addPiButton").addEventListener("click", addPi);
+
+// When modal is opened, load the current list
+const piModal = document.getElementById('piManagerModal');
+piModal.addEventListener('shown.bs.modal', loadPiList);
+
+// Delegate delete clicks inside the list
+document.getElementById("piList").addEventListener("click", function (e) {
+  if (e.target.closest(".delete-pi-btn")) {
+    const ip = e.target.closest(".delete-pi-btn").getAttribute("data-ip");
+    deletePi(ip);
+  }
+});
 
 // Add a Pi via POST
 async function addPi() {
@@ -483,83 +498,10 @@ async function updateStatus() {
 // Initial load of Pis so dashboard can use them
 window.addEventListener("DOMContentLoaded", async () => {
   await loadPiList();
-  updateStatus();
-  startCountdown();
+
+  // Now pis[] is ready — you can run updateStatus or any logic that needs pis
+  updateStatus(); // <-- assuming this is your dashboard init function
+  startCountdown(); // if using countdown
   updateCountdownDisplay();
-  applyCardLayout();
-
-  const modal = document.getElementById("piManagerModal");
-
-  if (modal) {
-    modal.addEventListener("shown.bs.modal", () => {
-      loadPiList().then(populatePiModalList); // Refresh the list and render
-
-      const addBtn = document.getElementById("addPiButton");
-      const nameInput = document.getElementById("piNameInput");
-      const ipInput = document.getElementById("piIpInput");
-
-      if (addBtn) {
-        addBtn.replaceWith(addBtn.cloneNode(true));
-        document.getElementById("addPiButton").addEventListener("click", async () => {
-          const newPi = {
-            name: nameInput.value.trim(),
-            ip: ipInput.value.trim()
-          };
-
-          if (!newPi.name || !newPi.ip) {
-            alert("Please enter both a name and IP address.");
-            return;
-          }
-
-          try {
-            const response = await fetch(`http://${window.location.hostname}:${flaskPort}/add_pi`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(newPi)
-            });
-
-            if (response.status === 409) {
-              alert("This IP is already in the list.");
-              return;
-            }
-
-            if (!response.ok) throw new Error("Failed to add Pi");
-
-            nameInput.value = "";
-            ipInput.value = "";
-            await loadPiList();
-            populatePiModalList(); // Update modal list view
-          } catch (err) {
-            console.error("Add Pi Error:", err);
-            alert("Unable to add Pi.");
-          }
-        });
-      }
-
-      const piListEl = document.getElementById("piList");
-      if (piListEl) {
-        piListEl.replaceWith(piListEl.cloneNode(true));
-        document.getElementById("piList").addEventListener("click", async (e) => {
-          if (e.target.closest(".delete-pi-btn")) {
-            const ip = e.target.closest(".delete-pi-btn").getAttribute("data-ip");
-
-            try {
-              const response = await fetch(`http://${window.location.hostname}:${flaskPort}/delete_pi`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ip })
-              });
-
-              if (!response.ok) throw new Error("Failed to delete Pi");
-              await loadPiList();
-              populatePiModalList(); // Refresh visible list
-            } catch (err) {
-              console.error("Delete Pi Error:", err);
-              alert("Unable to delete Pi.");
-            }
-          }
-        });
-      }
-    });
-  }
+  applyCardLayout(); // if you're using dynamic layout switching
 });
