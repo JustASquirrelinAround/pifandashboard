@@ -16,47 +16,50 @@
   License: MIT
 */
 
-let pis = []; // Global pis list for dashboard
-const flaskPort = 10001; // Port your Flask Pi Manager API is running on
+const flaskPort = 10001; // Port of your Flask Pi Manager API
+let pis = []; // Global list for dashboard + modal
 
-// Load Pis from Flask JSON endpoint
+// Load from Flask JSON endpoint
 async function loadPiList() {
   try {
     const response = await fetch(`http://${window.location.hostname}:${flaskPort}/get_pi_list`);
     const data = await response.json();
     pis = data;
-    populatePiModalList();
+    renderPiList(); // Show in modal
   } catch (err) {
-    console.error("Failed to load Pis:", err);
+    console.error("Failed to load Pi list:", err);
   }
 }
 
-// Add event listener for Add Pi button
-document.getElementById("addPiButton").addEventListener("click", addPi);
+// Display the Pi list in the modal
+function renderPiList() {
+  const list = document.getElementById("piListDisplay");
+  list.innerHTML = ""; // Clear previous
 
-// When modal is opened, load the current list
-const piModal = document.getElementById('piManagerModal');
-piModal.addEventListener('shown.bs.modal', loadPiList);
+  pis.forEach(pi => {
+    const item = document.createElement("div");
+    item.className = "list-group-item d-flex justify-content-between align-items-center bg-secondary text-white mb-2 rounded";
 
-// Delegate delete clicks inside the list
-document.getElementById("piList").addEventListener("click", function (e) {
-  if (e.target.closest(".delete-pi-btn")) {
-    const ip = e.target.closest(".delete-pi-btn").getAttribute("data-ip");
-    deletePi(ip);
-  }
-});
+    item.innerHTML = `
+      <span><strong>${pi.name}</strong> (${pi.ip})</span>
+      <button class="btn btn-sm btn-danger" data-ip="${pi.ip}">
+        <i class="bi bi-trash"></i>
+      </button>
+    `;
 
-// Add a Pi via POST
+    // Delete button handler
+    item.querySelector("button").addEventListener("click", () => deletePi(pi.ip));
+
+    list.appendChild(item);
+  });
+}
+
+// Add a new Pi
 async function addPi() {
-  const nameInput = document.getElementById("piNameInput");
-  const ipInput = document.getElementById("piIpInput");
+  const name = document.getElementById("piNameInput").value.trim();
+  const ip = document.getElementById("piIpInput").value.trim();
 
-  const newPi = {
-    name: nameInput.value.trim(),
-    ip: ipInput.value.trim()
-  };
-
-  if (!newPi.name || !newPi.ip) {
+  if (!name || !ip) {
     alert("Please enter both a name and IP address.");
     return;
   }
@@ -65,26 +68,27 @@ async function addPi() {
     const response = await fetch(`http://${window.location.hostname}:${flaskPort}/add_pi`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newPi)
+      body: JSON.stringify({ name, ip })
     });
 
     if (response.status === 409) {
-      alert("This IP is already in the list.");
+      alert("That IP address is already in the list.");
       return;
     }
 
     if (!response.ok) throw new Error("Failed to add Pi");
 
-    await loadPiList(); // Reload list after adding
-    nameInput.value = "";
-    ipInput.value = "";
+    // Clear form + reload list
+    document.getElementById("piNameInput").value = "";
+    document.getElementById("piIpInput").value = "";
+    await loadPiList();
   } catch (err) {
     console.error("Add Pi Error:", err);
-    alert("Unable to add Pi.");
+    alert("Could not add Pi.");
   }
 }
 
-// Delete a Pi
+// Delete Pi by IP
 async function deletePi(ip) {
   try {
     const response = await fetch(`http://${window.location.hostname}:${flaskPort}/delete_pi`, {
@@ -95,33 +99,18 @@ async function deletePi(ip) {
 
     if (!response.ok) throw new Error("Failed to delete Pi");
 
-    await loadPiList(); // Refresh list after deletion
+    await loadPiList();
   } catch (err) {
     console.error("Delete Pi Error:", err);
-    alert("Unable to delete Pi.");
+    alert("Could not delete Pi.");
   }
 }
 
-// Render modal list of Pis
-function populatePiModalList() {
-  const list = document.getElementById("piList");
-  list.innerHTML = "";
+// Hook modal open to load data
+document.getElementById("piListModal").addEventListener("shown.bs.modal", loadPiList);
 
-  pis.forEach((pi) => {
-    const li = document.createElement("li");
-    li.className = "list-group-item d-flex justify-content-between align-items-center";
-    li.innerHTML = `
-      <span><strong>${pi.name}</strong> (${pi.ip})</span>
-      <button class="btn btn-sm btn-danger delete-pi-btn" data-ip="${pi.ip}">
-        <i class="bi bi-trash"></i>
-      </button>
-    `;
-    list.appendChild(li);
-  });
-}
-
-// Refresh Pis every time the modal opens
-document.getElementById("addPiModal").addEventListener("show.bs.modal", loadPiList);
+// Add button event
+document.getElementById("addPiButton").addEventListener("click", addPi);
 
 const refreshInterval = 10;
 let countdown = refreshInterval;
