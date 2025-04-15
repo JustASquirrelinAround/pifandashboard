@@ -99,6 +99,12 @@ async function deletePi(ip) {
 
     if (!response.ok) throw new Error("Failed to delete Pi");
 
+    // Remove the card from the DOM if it exists
+    const card = document.getElementById(`card-${sanitizeId(ip)}`);
+    if (card) {
+      card.remove();
+    }
+
     await loadPiList();
   } catch (err) {
     console.error("Delete Pi Error:", err);
