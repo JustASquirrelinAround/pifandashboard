@@ -18,6 +18,7 @@
 
 const flaskPort = 10001; // Port of your Flask Pi Manager API
 let pis = []; // Global list for dashboard + modal
+let justAddedOfflineIp = null;
 
 // Load from Flask JSON endpoint
 async function loadPiList() {
@@ -25,7 +26,7 @@ async function loadPiList() {
     const response = await fetch(`http://${window.location.hostname}:${flaskPort}/get_pi_list`);
     const data = await response.json();
     pis = data;
-    setTimeout(renderPiList, 100); // short delay so cards can be created first
+    renderPiList
   } catch (err) {
     console.error("Failed to load Pi list:", err);
   }
@@ -34,22 +35,22 @@ async function loadPiList() {
 // Display the Pi list in the modal
 function renderPiList() {
   const list = document.getElementById("piListDisplay");
-  list.innerHTML = ""; // Clear previous
+  list.innerHTML = "";
 
-  pis.forEach(pi => {
-    const safeId = sanitizeId(pi.ip);
-
-    // Check if the related dashboard card has a danger background (offline)
-    const cardHeader = document.querySelector(`#card-${safeId} .card-header`);
-    const isOffline = cardHeader?.classList.contains("bg-danger");
-
+  pis.forEach((pi) => {
     const item = document.createElement("div");
-    item.className = "list-group-item d-flex justify-content-between align-items-center mb-2 rounded";
+    item.className = "list-group-item d-flex justify-content-between align-items-center mb-2 rounded text-white";
 
-    if (isOffline) {
+    const safeId = pi.ip.replaceAll(".", "-");
+    const header = document.querySelector(`#card-${safeId} .card-header`);
+
+    // Priority check: was this just added as offline?
+    if (pi.ip === justAddedOfflineIp) {
+      item.classList.add("bg-warning", "text-dark");
+    } else if (header && header.classList.contains("bg-danger")) {
       item.classList.add("bg-warning", "text-dark");
     } else {
-      item.classList.add("bg-secondary", "text-white");
+      item.classList.add("bg-secondary");
     }
 
     item.innerHTML = `
@@ -59,11 +60,12 @@ function renderPiList() {
       </button>
     `;
 
-    // Delete button handler
     item.querySelector("button").addEventListener("click", () => deletePi(pi.ip));
-
     list.appendChild(item);
   });
+
+  // Reset after use
+  justAddedOfflineIp = null;
 }
 
 
@@ -139,6 +141,9 @@ async function addPi() {
       showAlert("Pi added and reachable.", "success");
     } else {
       showAlert("Pi added but not reachable (offline or fan API unavailable).", "warning");
+      if (!apiReachable) {
+        justAddedOfflineIp = ip;
+      }
     }
 
     // Reload list and update cards
