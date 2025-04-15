@@ -488,13 +488,73 @@ window.addEventListener("DOMContentLoaded", async () => {
   updateCountdownDisplay();
   applyCardLayout();
 
-  // Now safe to add these because DOM is loaded
-  // document.getElementById("addPiButton").addEventListener("click", addPi);
-  document.getElementById("piManagerModal").addEventListener("shown.bs.modal", loadPiList);
-  document.getElementById("piList").addEventListener("click", function (e) {
-    if (e.target.closest(".delete-pi-btn")) {
-      const ip = e.target.closest(".delete-pi-btn").getAttribute("data-ip");
-      deletePi(ip);
-    }
-  });
+  const modal = document.getElementById("piManagerModal");
+
+  if (modal) {
+    modal.addEventListener("shown.bs.modal", () => {
+      loadPiList(); // Refresh the Pi list from Flask API
+
+      const addBtn = document.getElementById("addPiButton");
+      const nameInput = document.getElementById("piNameInput");
+      const ipInput = document.getElementById("piIpInput");
+
+      if (addBtn) {
+        // Remove any previous listener first to avoid stacking
+        addBtn.replaceWith(addBtn.cloneNode(true));
+        document.getElementById("addPiButton").addEventListener("click", async () => {
+          const newPi = {
+            name: nameInput.value.trim(),
+            ip: ipInput.value.trim()
+          };
+
+          if (!newPi.name || !newPi.ip) {
+            alert("Please enter both a name and IP address.");
+            return;
+          }
+
+          try {
+            const response = await fetch("http://<your_pi_ip>:10001/add_pi", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(newPi)
+            });
+
+            if (!response.ok) throw new Error("Failed to add Pi");
+
+            nameInput.value = "";
+            ipInput.value = "";
+            await loadPiList(); // Refresh list
+          } catch (err) {
+            console.error("Add Pi Error:", err);
+            alert("Unable to add Pi.");
+          }
+        });
+      }
+
+      // Delegate delete events
+      const piListEl = document.getElementById("piList");
+      if (piListEl) {
+        piListEl.replaceWith(piListEl.cloneNode(true));
+        document.getElementById("piList").addEventListener("click", async (e) => {
+          if (e.target.closest(".delete-pi-btn")) {
+            const ip = e.target.closest(".delete-pi-btn").getAttribute("data-ip");
+
+            try {
+              const response = await fetch("http://<your_pi_ip>:10001/delete_pi", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ ip })
+              });
+
+              if (!response.ok) throw new Error("Failed to delete Pi");
+              await loadPiList();
+            } catch (err) {
+              console.error("Delete Pi Error:", err);
+              alert("Unable to delete Pi.");
+            }
+          }
+        });
+      }
+    });
+  }
 });
