@@ -25,7 +25,7 @@ async function loadPiList() {
     const response = await fetch(`http://${window.location.hostname}:${flaskPort}/get_pi_list`);
     const data = await response.json();
     pis = data;
-    renderPiList(); // Show in modal
+    setTimeout(renderPiList, 100); // short delay so cards can be created first
   } catch (err) {
     console.error("Failed to load Pi list:", err);
   }
@@ -155,7 +155,8 @@ function showAlert(message, type = "success", persistent = false) {
   const alertBox = document.getElementById("piAlert");
   if (!alertBox) return;
 
-  alertBox.className = `alert alert-${type} mt-2`;
+  // Set content and styling
+  alertBox.className = `alert alert-${type} fade show mt-2`;
   alertBox.innerHTML = persistent
     ? `${message} <button type="button" class="btn-close float-end" data-bs-dismiss="alert" aria-label="Close"></button>`
     : message;
@@ -163,7 +164,13 @@ function showAlert(message, type = "success", persistent = false) {
   alertBox.classList.remove("d-none");
 
   if (!persistent) {
-    setTimeout(clearAlert, 5000); // Auto-dismiss
+    // Fade out after 5s
+    setTimeout(() => {
+      alertBox.classList.remove("show"); // triggers fade out
+      setTimeout(() => {
+        clearAlert(); // remove completely after fade transition
+      }, 300); // Bootstrap fade duration
+    }, 5000);
   }
 }
 
