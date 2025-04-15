@@ -104,6 +104,15 @@ async function addPi() {
     return;
   }
 
+  // Show "checking" spinner
+  alertBox.className = "alert alert-info";
+  alertBox.innerHTML = `
+    <div class="d-flex justify-content-between align-items-center">
+      <span><i class="bi bi-search me-2"></i>Checking Pi status...</span>
+      <div class="spinner-border spinner-border-sm text-primary ms-3" role="status"></div>
+    </div>
+  `;
+
   // Check if the fan API is reachable
   let apiReachable = false;
   try {
