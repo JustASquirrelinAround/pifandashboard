@@ -15,45 +15,73 @@ import json
 import os
 
 app = Flask(__name__)
-CORS(app)  # Enable cross-origin access for web dashboard
+CORS(app, supports_credentials=True)  # Enable CORS for dashboard access
 
 PI_LIST_FILE = "/var/www/fandashboard/pi_list.json"
 
-# Create an empty file if it doesn't exist
+# Create an empty JSON file if not found
 def init_pi_list():
     if not os.path.exists(PI_LIST_FILE):
         with open(PI_LIST_FILE, "w") as f:
             json.dump([], f)
 
-# Read the current Pi list
+# Read list from disk
 def load_pi_list():
     with open(PI_LIST_FILE, "r") as f:
         return json.load(f)
 
-# Save the Pi list to disk
+# Save updated list to disk
 def save_pi_list(data):
     with open(PI_LIST_FILE, "w") as f:
         json.dump(data, f, indent=2)
 
-@app.route("/pis", methods=["GET"])
-def get_pis():
+# GET: /get_pi_list – Return current list
+@app.route("/get_pi_list", methods=["GET"])
+def get_pi_list():
     try:
         init_pi_list()
         return jsonify(load_pi_list())
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route("/pis", methods=["POST"])
-def update_pis():
+# POST: /add_pi – Add a new Pi
+@app.route("/add_pi", methods=["POST"])
+def add_pi():
     try:
-        pi_data = request.get_json()
-        if not isinstance(pi_data, list):
-            return jsonify({"error": "Expected a list of Pi entries"}), 400
-        save_pi_list(pi_data)
-        return jsonify({"status": "success"})
+        new_pi = request.get_json()
+        if not new_pi.get("name") or not new_pi.get("ip"):
+            return jsonify({"error": "Missing 'name' or 'ip'"}), 400
+
+        init_pi_list()
+        pis = load_pi_list()
+
+        # Prevent duplicate IPs
+        if any(p['ip'] == new_pi['ip'] for p in pis):
+            return jsonify({"error": "IP already exists"}), 409
+
+        pis.append(new_pi)
+        save_pi_list(pis)
+        return jsonify({"status": "added"}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# POST: /delete_pi – Remove by IP
+@app.route("/delete_pi", methods=["POST"])
+def delete_pi():
+    try:
+        pi_to_delete = request.get_json()
+        if not pi_to_delete.get("ip"):
+            return jsonify({"error": "Missing 'ip' field"}), 400
+
+        init_pi_list()
+        pis = load_pi_list()
+        pis = [p for p in pis if p['ip'] != pi_to_delete['ip']]
+        save_pi_list(pis)
+        return jsonify({"status": "deleted"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Run the app
 if __name__ == "__main__":
     init_pi_list()
     app.run(host="0.0.0.0", port=10001)

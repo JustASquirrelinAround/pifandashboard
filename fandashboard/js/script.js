@@ -68,6 +68,11 @@ async function addPi() {
       body: JSON.stringify(newPi)
     });
 
+    if (response.status === 409) {
+      alert("This IP is already in the list.");
+      return;
+    }
+
     if (!response.ok) throw new Error("Failed to add Pi");
 
     await loadPiList(); // Reload list after adding
