@@ -44,11 +44,11 @@ function handleEditMode(li, pi) {
     <div class="col-12 col-md-4">
       <input type="text" class="form-control form-control-sm edit-ip" value="${pi.ip}" />
     </div>
-    <div class="col-12 col-md-4 d-flex justify-content-md-end justify-content-center gap-2 align-items-center pe-2">
-      <button class="btn btn-sm btn-success save-btn m-0">
+    <div class="col-12 col-md-4 d-flex justify-content-md-end justify-content-center gap-2 align-items-center">
+      <button class="btn btn-sm btn-success save-btn">
         <i class="bi bi-check-lg"></i>
       </button>
-      <button class="btn btn-sm btn-danger cancel-btn m-0">
+      <button class="btn btn-sm btn-danger cancel-btn">
         <i class="bi bi-x-lg"></i>
       </button>
     </div>
