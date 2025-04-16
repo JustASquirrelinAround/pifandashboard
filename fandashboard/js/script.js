@@ -81,12 +81,14 @@ function handleEditMode(li, pi) {
     </div>
   `;
 
+    let apiReachable = false;
     try {
       const fanCheck = await fetchWithTimeout(`http://${updatedIp}:10000/status`, { timeout: 2000 });
       if (!fanCheck.ok) {
         li.classList.add("bg-warning-subtle", "text-dark");
       } else {
         li.classList.remove("bg-warning-subtle", "text-dark");
+        apiReachable = true;
       }
     } catch (err) {
       li.classList.add("bg-warning-subtle", "text-dark");
@@ -100,6 +102,19 @@ function handleEditMode(li, pi) {
     } catch (err) {
       showAlert("Error updating Pi.", "danger", true);
     }
+
+    try {
+      await editPi(pi.ip, updatedPi);
+      showAlert("Pi updated successfully.", "success");
+    } catch (err) {
+      showAlert("Error updating Pi.", "danger", true);
+    }
+
+    // Update pi.ip to the new IP before re-rendering
+    pi.ip = updatedIp;
+
+    // Save to track offline status for re-render
+    if (!apiReachable) justAddedOfflineIp = updatedIp;
 
     // Remove card so it is refreshed
     const oldCard = document.getElementById(`card-${pi.ip.replaceAll(".", "-")}`);
