@@ -41,7 +41,7 @@ function handleEditMode(li, pi) {
     <input type="text" class="form-control form-control-sm edit-name flex-grow-1" style="max-width: 250px;" value="${pi.name}" />
     <input type="text" class="form-control form-control-sm edit-ip flex-grow-1" style="max-width: 250px;" value="${pi.ip}" />
     <div class="d-flex gap-2 ms-auto">
-      <button class="btn btn-sm btn-success save-btn">
+      <button class="btn btn-sm btn-success save-btn me-1">
         <i class="bi bi-check-lg"></i>
       </button>
       <button class="btn btn-sm btn-danger cancel-btn">
