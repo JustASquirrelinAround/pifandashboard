@@ -172,9 +172,33 @@ Move the dashboard folder into your web server root:
 sudo cp -r fandashboard/ /var/www/
 ```
 
+---
+
+## 🔧 Install Pi Manager API (REQUIRED)
+
+After installing the dashboard, run the following from the repo directory:
+
+```bash
+bash install_pi_manager.sh
+```
+
+This script:
+- Creates a Flask API service for managing a `pi_list.json` file
+- Sets it up to run as a systemd service on port `10001`
+
+You can now use the **"Edit Pi List"** button in the top right of the dashboard to:
+- Add a Pi (name and IP)
+- Edit or remove Pis from the list and page
+
+> ⚠️ Pis managed via the UI are stored in `/var/www/fandashboard/pi_list.json` and persist across updates.
+
+---
+
 ### 🔧 Nginx Configuration
 
 If you're using **Nginx**, update your `sites-available/default` config:
+
+> Located at /etc/nginix/sites-available
 
 ```nginx
 server {
@@ -198,7 +222,7 @@ Then reload Nginx:
 sudo systemctl reload nginx
 ```
 
-You can now access the dashboard via your Pi’s IP.
+## You can now access the dashboard via your Pi’s IP.
 
 ---
 
@@ -219,24 +243,6 @@ You can now access the dashboard via your Pi’s IP.
 <img width="1315" alt="Screenshot 2025-04-15 at 11 33 50 PM" src="https://github.com/user-attachments/assets/78818538-5f25-4642-952f-2d031c5d7192" />
 <img width="1323" alt="Screenshot 2025-04-15 at 11 33 34 PM" src="https://github.com/user-attachments/assets/a8df093d-8d24-488a-971e-a12cb5fc5cc4" />
 <img width="815" alt="Screenshot 2025-04-15 at 11 37 17 PM" src="https://github.com/user-attachments/assets/38375dba-bcf3-49bd-83cd-017e46aea32a" />
-
----
-
-## ⚙️ Configuration
-
-Edit `script.js` to define the list of Pis:
-
-```js
-const pis = [
-  { name: "Homebridge", ip: "192.168.1.101" },
-  { name: "Adblock Pi", ip: "192.168.1.102" },
-  ...
-];
-```
-
----
-
-## Coming Soon
 
 ---
 
