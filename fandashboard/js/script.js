@@ -70,6 +70,8 @@ function handleEditMode(li, pi) {
       return;
     }
 
+    const alertBox = document.getElementById("piAlert");
+
     // Show "checking" spinner
     alertBox.className = "alert alert-info";
     alertBox.innerHTML = `
