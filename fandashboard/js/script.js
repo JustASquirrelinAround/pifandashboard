@@ -48,7 +48,7 @@ function handleEditMode(li, pi) {
       <button class="btn btn-sm btn-success save-btn">
         <i class="bi bi-check-lg"></i>
       </button>
-      <button class="btn btn-sm btn-secondary cancel-btn">
+      <button class="btn btn-sm btn-danger cancel-btn me-0">
         <i class="bi bi-x-lg"></i>
       </button>
     </div>
