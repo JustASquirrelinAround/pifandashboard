@@ -44,8 +44,8 @@ function handleEditMode(li, pi) {
     <div class="col-12 col-md-4">
       <input type="text" class="form-control form-control-sm edit-ip" value="${pi.ip}" />
     </div>
-    <div class="col-12 col-md-4 d-flex justify-content-md-end justify-content-center gap-2 align-items-center">
-      <button class="btn btn-sm btn-success save-btn">
+    <div class="col-12 col-md-4 d-flex justify-content-md-end justify-content-center align-items-center">
+      <button class="btn btn-sm btn-success save-btn me-2">
         <i class="bi bi-check-lg"></i>
       </button>
       <button class="btn btn-sm btn-danger cancel-btn">
