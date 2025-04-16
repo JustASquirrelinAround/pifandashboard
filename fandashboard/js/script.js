@@ -37,19 +37,23 @@ async function loadPiList() {
 function handleEditMode(li, pi) {
   // Create input fields pre-filled with current values
   li.innerHTML = `
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 w-100">
-      <input type="text" class="form-control form-control-sm edit-name" value="${pi.name}" style="max-width: 45%;" />
-      <input type="text" class="form-control form-control-sm edit-ip" value="${pi.ip}" style="max-width: 45%;" />
-      <div class="d-flex gap-1">
-        <button class="btn btn-sm btn-success save-btn">
-          <i class="bi bi-check-lg"></i>
-        </button>
-        <button class="btn btn-sm btn-secondary cancel-btn">
-          <i class="bi bi-x-lg"></i>
-        </button>
-      </div>
+  <div class="row w-100 g-2 align-items-center">
+    <div class="col-12 col-md-4">
+      <input type="text" class="form-control form-control-sm edit-name" value="${pi.name}" />
     </div>
-  `;
+    <div class="col-12 col-md-4">
+      <input type="text" class="form-control form-control-sm edit-ip" value="${pi.ip}" />
+    </div>
+    <div class="col-12 col-md-4 d-flex gap-2 justify-content-md-start justify-content-center">
+      <button class="btn btn-sm btn-success save-btn">
+        <i class="bi bi-check-lg"></i>
+      </button>
+      <button class="btn btn-sm btn-secondary cancel-btn">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+  </div>
+`;
 
   li.querySelector(".save-btn").addEventListener("click", async () => {
     const updatedName = li.querySelector(".edit-name").value.trim();
@@ -460,15 +464,15 @@ function updateCard(pi) {
   const wasOffline = cardEl.querySelector(".card-header.bg-danger") !== null;
   const isNowOffline = !!pi.data.error;
 
-        // If online/offline state has changed, fully re-render card
-        if (wasOffline !== isNowOffline) {
-          cardEl.remove();
-          createCard(pi);
+  // If online/offline state has changed, fully re-render card
+  if (wasOffline !== isNowOffline) {
+    cardEl.remove();
+    createCard(pi);
 
-          // Schedule a second update to render Chart.js properly
-          setTimeout(() => updateCard(pi), 0);
-          return;
-        }
+    // Schedule a second update to render Chart.js properly
+    setTimeout(() => updateCard(pi), 0);
+    return;
+  }
 
   // Update dot color
   const dot = cardEl.querySelector(".status-dot");
