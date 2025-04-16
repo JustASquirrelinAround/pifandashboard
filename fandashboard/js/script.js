@@ -39,7 +39,7 @@ function renderPiList() {
 
   pis.forEach((pi) => {
     const item = document.createElement("div");
-    item.className = "list-group-item d-flex justify-content-between align-items-center mb-2 rounded text-white";
+    item.className = "list-group-item d-flex justify-content-between align-items-center mb-2 rounded";
 
     const safeId = pi.ip.replaceAll(".", "-");
     const header = document.querySelector(`#card-${safeId} .card-header`);
@@ -50,7 +50,7 @@ function renderPiList() {
     } else if (header && header.classList.contains("bg-danger")) {
       item.classList.add("bg-warning-subtle", "text-dark");
     } else {
-      item.classList.add("bg-secondary");
+      item.classList.add("bg-secondary", "text-white");
     }
 
     item.innerHTML = `
