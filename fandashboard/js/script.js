@@ -32,6 +32,81 @@ async function loadPiList() {
   }
 }
 
+// New Function: Switch a list item to edit mode with editable inputs
+// This function replaces the Pi entry display with input fields and Save/Cancel buttons.
+function handleEditMode(li, pi) {
+  // Create input fields pre-filled with current values
+  li.innerHTML = `
+    <input type="text" class="form-control form-control-sm edit-name mb-1" value="${pi.name}" />
+    <input type="text" class="form-control form-control-sm edit-ip mb-1" value="${pi.ip}" />
+    <div>
+      <button class="btn btn-sm btn-success save-btn">
+        <i class="bi bi-check-lg"></i> Save
+      </button>
+      <button class="btn btn-sm btn-secondary cancel-btn">
+        <i class="bi bi-x-lg"></i> Cancel
+      </button>
+    </div>
+  `;
+
+  // Handle Save action
+  li.querySelector(".save-btn").addEventListener("click", async () => {
+    const updatedName = li.querySelector(".edit-name").value.trim();
+    const updatedIp = li.querySelector(".edit-ip").value.trim();
+
+    // If inputs are empty, simply reload the list without saving
+    if (!updatedName || !updatedIp) {
+      await loadPiList();
+      return;
+    }
+
+    // If IP has changed, check fan API status using fetchWithTimeout
+    if (updatedIp !== pi.ip) {
+      try {
+        const fanCheck = await fetchWithTimeout(`http://${updatedIp}:10000/status`, { timeout: 2000 });
+        if (!fanCheck.ok) {
+          // Highlight the item in yellow if the updated IP is offline
+          li.classList.add("bg-warning-subtle", "text-dark");
+        }
+      } catch (err) {
+        // On error, also highlight as offline
+        li.classList.add("bg-warning-subtle", "text-dark");
+      }
+    }
+
+    // Prepare updated Pi data
+    const updatedPi = { name: updatedName, ip: updatedIp };
+
+    // Send the updated data to the server via editPi function
+    await editPi(pi.ip, updatedPi);
+
+    // Reload the Pi list to reflect changes
+    await loadPiList();
+  });
+
+  // Handle Cancel action: reload the list without saving changes
+  li.querySelector(".cancel-btn").addEventListener("click", async () => {
+    await loadPiList();
+  });
+}
+
+// This function posts the updated Pi data to the '/edit_pi' endpoint.
+async function editPi(originalIp, updatedPi) {
+  try {
+    const response = await fetch(`http://${window.location.hostname}:${flaskPort}/edit_pi`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ originalIp, ...updatedPi })
+    });
+    if (!response.ok) {
+      throw new Error("Failed to edit Pi");
+    }
+  } catch (err) {
+    console.error("Edit Pi Error:", err);
+    alert("Could not update Pi details.");
+  }
+}
+
 // Display the Pi list in the modal
 function renderPiList() {
   const list = document.getElementById("piListDisplay");
@@ -53,14 +128,21 @@ function renderPiList() {
       item.classList.add("bg-secondary", "text-white");
     }
 
+    // Set up the list item with Pi info and Edit/Delete buttons
     item.innerHTML = `
       <span><strong>${pi.name}</strong> (${pi.ip})</span>
-      <button class="btn btn-sm btn-danger" data-ip="${pi.ip}">
-        <i class="bi bi-trash"></i>
-      </button>
+      <div>
+        <button class="btn btn-sm btn-primary edit-btn" data-ip="${pi.ip}">
+          <i class="bi bi-pencil"></i> Edit
+        </button>
+        <button class="btn btn-sm btn-danger delete-btn" data-ip="${pi.ip}">
+          <i class="bi bi-trash"></i> Delete
+        </button>
+      </div>
     `;
-
-    item.querySelector("button").addEventListener("click", () => deletePi(pi.ip));
+    // Attach event handlers for edit and delete actions
+    item.querySelector(".edit-btn").addEventListener("click", () => handleEditMode(item, pi));
+    item.querySelector(".delete-btn").addEventListener("click", () => deletePi(pi.ip));
     list.appendChild(item);
   });
 

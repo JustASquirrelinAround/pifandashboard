@@ -35,7 +35,7 @@ def save_pi_list(data):
     with open(PI_LIST_FILE, "w") as f:
         json.dump(data, f, indent=2)
 
-# GET: /get_pi_list – Return current list
+# GET: /get_pi_list - Return current list
 @app.route("/get_pi_list", methods=["GET"])
 def get_pi_list():
     try:
@@ -44,7 +44,7 @@ def get_pi_list():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# POST: /add_pi – Add a new Pi
+# POST: /add_pi - Add a new Pi
 @app.route("/add_pi", methods=["POST"])
 def add_pi():
     try:
@@ -65,7 +65,7 @@ def add_pi():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# POST: /delete_pi – Remove by IP
+# POST: /delete_pi - Remove by IP
 @app.route("/delete_pi", methods=["POST"])
 def delete_pi():
     try:
@@ -78,6 +78,35 @@ def delete_pi():
         pis = [p for p in pis if p['ip'] != pi_to_delete['ip']]
         save_pi_list(pis)
         return jsonify({"status": "deleted"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# POST: /edit_pi - Edit a Pi's name or IP
+@app.route("/edit_pi", methods=["POST"])
+def edit_pi():
+    try:
+        data = request.get_json()
+        old_ip = data.get("old_ip")
+        new_name = data.get("name")
+        new_ip = data.get("ip")
+
+        if not old_ip or not new_name or not new_ip:
+            return jsonify({"error": "Missing required fields"}), 400
+
+        init_pi_list()
+        pis = load_pi_list()
+
+        for pi in pis:
+            if pi["ip"] == old_ip:
+                pi["name"] = new_name
+                pi["ip"] = new_ip
+                break
+        else:
+            return jsonify({"error": "Pi not found"}), 404
+
+        save_pi_list(pis)
+        return jsonify({"status": "updated"}), 200
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
