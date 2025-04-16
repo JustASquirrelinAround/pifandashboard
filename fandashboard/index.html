@@ -39,12 +39,18 @@
     <h1 class="mb-4"><i class="bi bi-speedometer2"></i> Raspberry Pi Fan Status</h1>
     <div id="countdown-desktop" class="position-absolute top-0 end-0 d-none d-md-block" style="margin-right: 0.75rem;">
       <div class="d-flex flex-column align-items-end gap-2">
+        <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#piListModal">
+          <i class="bi bi-pencil-square me-1"></i>Edit Pi List
+        </button>
         <div class="badge bg-info text-dark p-3 fs-6 shadow" style="width: 210px;">
           <i class="bi bi-hourglass-split"></i> Next update in <span id="countdown-desktop-value">10</span>s
         </div>
       </div>
     </div>
     <div id="countdown-mobile" class="d-block d-md-none my-3">
+      <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#piListModal">
+        <i class="bi bi-pencil-square me-1"></i>Edit Pi List
+      </button>
       <div class="badge bg-info text-dark p-2 fs-6 shadow" style="width: 200px;">
         <i class="bi bi-hourglass-split"></i> Next update in <span id="countdown-mobile-value">10</span>s
       </div>
@@ -67,10 +73,6 @@
               <i class="bi bi-clock me-1"></i>Last update: --:--
             </span>
           </div>
-
-          <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#piListModal">
-            <i class="bi bi-pencil-square me-1"></i>Edit Pi List
-          </button>
           <!-- Button aligned to end -->
           <div id="cardrowButton" class="d-none d-xl-block">
             <button class="btn btn-outline-light btn-sm" onclick="toggleCardLayout()" id="layoutToggleBtn">
