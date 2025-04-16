@@ -216,9 +216,9 @@ You can now access the dashboard via your Pi’s IP.
 
 ## 📸 Screenshots
 
-![newfanstatus3](https://github.com/user-attachments/assets/5676e1fc-c3f0-42ea-b5ec-47967f48f4b0)
-![newfanstatus2](https://github.com/user-attachments/assets/f0e087ed-6606-4de4-aedf-60fc93a6bdf3)
-![newfanstatusoffline](https://github.com/user-attachments/assets/6db44c27-5fa2-4d7a-9db2-d080bb603857)
+<img width="1315" alt="Screenshot 2025-04-15 at 11 33 50 PM" src="https://github.com/user-attachments/assets/78818538-5f25-4642-952f-2d031c5d7192" />
+<img width="1323" alt="Screenshot 2025-04-15 at 11 33 34 PM" src="https://github.com/user-attachments/assets/a8df093d-8d24-488a-971e-a12cb5fc5cc4" />
+<img width="815" alt="Screenshot 2025-04-15 at 11 37 17 PM" src="https://github.com/user-attachments/assets/38375dba-bcf3-49bd-83cd-017e46aea32a" />
 
 ---
 
