@@ -38,7 +38,7 @@ function handleEditMode(li, pi) {
   // Create input fields pre-filled with current values
   li.innerHTML = `
   <div class="d-flex flex-wrap justify-content-between w-100 align-items-center">
-    <div class="d-flex">
+    <div class="d-flex gap-1">
       <input type="text" class="form-control form-control-sm edit-name flex-grow-1" style="max-width: 250px;" value="${pi.name}" />
       <input type="text" class="form-control form-control-sm edit-ip flex-grow-1" style="max-width: 250px;" value="${pi.ip}" />
     </div>
