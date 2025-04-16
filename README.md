@@ -176,7 +176,7 @@ sudo cp -r fandashboard/ /var/www/
 
 ## 🔧 Install Pi Manager API (REQUIRED)
 
-After installing the dashboard, run the following from the repo directory:
+After copying the dashboard files, run the following from the repo directory:
 
 ```bash
 bash install_pi_manager.sh
@@ -194,7 +194,7 @@ You can now use the **"Edit Pi List"** button in the top right of the dashboard 
 
 ---
 
-### 🔧 Nginx Configuration
+## 🔧 Nginx Configuration
 
 If you're using **Nginx**, update your `sites-available/default` config:
 
@@ -222,7 +222,7 @@ Then reload Nginx:
 sudo systemctl reload nginx
 ```
 
-## You can now access the dashboard via your Pi’s IP.
+## You can now access the dashboard via your Pi’s IP. 🎉🎉🎉
 
 ---
 
