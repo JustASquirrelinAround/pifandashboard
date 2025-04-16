@@ -46,9 +46,9 @@ function renderPiList() {
 
     // Priority check: was this just added as offline?
     if (pi.ip === justAddedOfflineIp) {
-      item.classList.add("bg-warning", "text-dark");
+      item.classList.add("bg-warning-subtle", "text-dark");
     } else if (header && header.classList.contains("bg-danger")) {
-      item.classList.add("bg-warning", "text-dark");
+      item.classList.add("bg-warning-subtle", "text-dark");
     } else {
       item.classList.add("bg-secondary");
     }
