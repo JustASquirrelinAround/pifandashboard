@@ -37,15 +37,11 @@ async function loadPiList() {
 function handleEditMode(li, pi) {
   // Create input fields pre-filled with current values
   li.innerHTML = `
-  <div class="row w-100 g-2 align-items-center">
-    <div class="col-12 col-md-4">
-      <input type="text" class="form-control form-control-sm edit-name" value="${pi.name}" />
-    </div>
-    <div class="col-12 col-md-4">
-      <input type="text" class="form-control form-control-sm edit-ip" value="${pi.ip}" />
-    </div>
-    <div class="col-12 col-md-4 d-flex justify-content-md-end justify-content-center align-items-center">
-      <button class="btn btn-sm btn-success save-btn me-2">
+  <div class="d-flex flex-wrap justify-content-between w-100 align-items-center gap-2">
+    <input type="text" class="form-control form-control-sm edit-name flex-grow-1" style="max-width: 250px;" value="${pi.name}" />
+    <input type="text" class="form-control form-control-sm edit-ip flex-grow-1" style="max-width: 250px;" value="${pi.ip}" />
+    <div class="d-flex gap-2 ms-auto">
+      <button class="btn btn-sm btn-success save-btn">
         <i class="bi bi-check-lg"></i>
       </button>
       <button class="btn btn-sm btn-danger cancel-btn">
