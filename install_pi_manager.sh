@@ -86,27 +86,29 @@ def delete_pi():
 def edit_pi():
     try:
         data = request.get_json()
-        old_ip = data.get("old_ip")
+        original_ip = data.get("originalIp")
         new_name = data.get("name")
         new_ip = data.get("ip")
 
-        if not old_ip or not new_name or not new_ip:
+        if not original_ip or not new_name or not new_ip:
             return jsonify({"error": "Missing required fields"}), 400
 
         init_pi_list()
         pis = load_pi_list()
 
+        found = False
         for pi in pis:
-            if pi["ip"] == old_ip:
+            if pi["ip"] == original_ip:
                 pi["name"] = new_name
                 pi["ip"] = new_ip
+                found = True
                 break
-        else:
-            return jsonify({"error": "Pi not found"}), 404
+
+        if not found:
+            return jsonify({"error": "Original IP not found"}), 404
 
         save_pi_list(pis)
-        return jsonify({"status": "updated"}), 200
-
+        return jsonify({"status": "updated"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

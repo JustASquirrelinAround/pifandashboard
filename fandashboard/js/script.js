@@ -37,54 +37,58 @@ async function loadPiList() {
 function handleEditMode(li, pi) {
   // Create input fields pre-filled with current values
   li.innerHTML = `
-    <input type="text" class="form-control form-control-sm edit-name mb-1" value="${pi.name}" />
-    <input type="text" class="form-control form-control-sm edit-ip mb-1" value="${pi.ip}" />
-    <div>
-      <button class="btn btn-sm btn-success save-btn">
-        <i class="bi bi-check-lg"></i> Save
-      </button>
-      <button class="btn btn-sm btn-secondary cancel-btn">
-        <i class="bi bi-x-lg"></i> Cancel
-      </button>
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 w-100">
+      <input type="text" class="form-control form-control-sm edit-name" value="${pi.name}" style="max-width: 45%;" />
+      <input type="text" class="form-control form-control-sm edit-ip" value="${pi.ip}" style="max-width: 45%;" />
+      <div class="d-flex gap-1">
+        <button class="btn btn-sm btn-success save-btn">
+          <i class="bi bi-check-lg"></i>
+        </button>
+        <button class="btn btn-sm btn-secondary cancel-btn">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
     </div>
   `;
 
-  // Handle Save action
   li.querySelector(".save-btn").addEventListener("click", async () => {
     const updatedName = li.querySelector(".edit-name").value.trim();
     const updatedIp = li.querySelector(".edit-ip").value.trim();
 
-    // If inputs are empty, simply reload the list without saving
     if (!updatedName || !updatedIp) {
+      showAlert("Both fields are required to save.", "warning", true);
       await loadPiList();
       return;
     }
 
-    // If IP has changed, check fan API status using fetchWithTimeout
     if (updatedIp !== pi.ip) {
       try {
         const fanCheck = await fetchWithTimeout(`http://${updatedIp}:10000/status`, { timeout: 2000 });
         if (!fanCheck.ok) {
-          // Highlight the item in yellow if the updated IP is offline
           li.classList.add("bg-warning-subtle", "text-dark");
         }
       } catch (err) {
-        // On error, also highlight as offline
         li.classList.add("bg-warning-subtle", "text-dark");
       }
     }
 
-    // Prepare updated Pi data
     const updatedPi = { name: updatedName, ip: updatedIp };
 
-    // Send the updated data to the server via editPi function
-    await editPi(pi.ip, updatedPi);
+    try {
+      await editPi(pi.ip, updatedPi);
+      showAlert("Pi updated successfully.", "success");
+    } catch (err) {
+      showAlert("Error updating Pi.", "danger", true);
+    }
 
-    // Reload the Pi list to reflect changes
+    // Remove card so it is refreshed
+    const oldCard = document.getElementById(`card-${pi.ip.replaceAll(".", "-")}`);
+    if (oldCard) oldCard.remove();
+
     await loadPiList();
+    await updateStatus();
   });
 
-  // Handle Cancel action: reload the list without saving changes
   li.querySelector(".cancel-btn").addEventListener("click", async () => {
     await loadPiList();
   });
