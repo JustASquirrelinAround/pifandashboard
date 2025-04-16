@@ -19,6 +19,7 @@
 const flaskPort = 10001; // Port of your Flask Pi Manager API
 let pis = []; // Global list for dashboard + modal
 let justAddedOfflineIp = null;
+let currentlyEditingItem = null;
 
 // Load from Flask JSON endpoint
 async function loadPiList() {
@@ -35,6 +36,12 @@ async function loadPiList() {
 // New Function: Switch a list item to edit mode with editable inputs
 // This function replaces the Pi entry display with input fields and Save/Cancel buttons.
 function handleEditMode(li, pi) {
+  if (currentlyEditingItem && currentlyEditingItem !== li) {
+    // Trigger cancel on previous edit
+    const cancelBtn = currentlyEditingItem.querySelector(".cancel-btn");
+    if (cancelBtn) cancelBtn.click();
+  }
+  currentlyEditingItem = li;
   // Create input fields pre-filled with current values
   li.innerHTML = `
   <div class="d-flex flex-wrap justify-content-between w-100 align-items-center">
@@ -63,15 +70,24 @@ function handleEditMode(li, pi) {
       return;
     }
 
-    if (updatedIp !== pi.ip) {
-      try {
-        const fanCheck = await fetchWithTimeout(`http://${updatedIp}:10000/status`, { timeout: 2000 });
-        if (!fanCheck.ok) {
-          li.classList.add("bg-warning-subtle", "text-dark");
-        }
-      } catch (err) {
+    // Show "checking" spinner
+    alertBox.className = "alert alert-info";
+    alertBox.innerHTML = `
+    <div class="d-flex justify-content-between align-items-center">
+      <span><i class="bi bi-search me-2"></i>Checking Pi status...</span>
+      <div class="spinner-border spinner-border-sm text-primary ms-3" role="status"></div>
+    </div>
+  `;
+
+    try {
+      const fanCheck = await fetchWithTimeout(`http://${updatedIp}:10000/status`, { timeout: 2000 });
+      if (!fanCheck.ok) {
         li.classList.add("bg-warning-subtle", "text-dark");
+      } else {
+        li.classList.remove("bg-warning-subtle", "text-dark");
       }
+    } catch (err) {
+      li.classList.add("bg-warning-subtle", "text-dark");
     }
 
     const updatedPi = { name: updatedName, ip: updatedIp };
@@ -91,8 +107,21 @@ function handleEditMode(li, pi) {
     await updateStatus();
   });
 
-  li.querySelector(".cancel-btn").addEventListener("click", async () => {
-    await loadPiList();
+  li.querySelector(".cancel-btn").addEventListener("click", () => {
+    currentlyEditingItem = null;
+    li.innerHTML = `
+      <span><strong>${pi.name}</strong> (${pi.ip})</span>
+      <div>
+        <button class="btn btn-sm btn-primary edit-btn" data-ip="${pi.ip}">
+          <i class="bi bi-pencil"></i>
+        </button>
+        <button class="btn btn-sm btn-danger delete-btn" data-ip="${pi.ip}">
+          <i class="bi bi-trash"></i>
+        </button>
+      </div>
+    `;
+    li.querySelector(".edit-btn").addEventListener("click", () => handleEditMode(li, pi));
+    li.querySelector(".delete-btn").addEventListener("click", () => deletePi(pi.ip));
   });
 }
 
@@ -246,6 +275,7 @@ async function addPi() {
     // Reload list and update cards
     await loadPiList();
     await updateStatus();
+    currentlyEditingItem = null;
 
   } catch (err) {
     console.error("Add Pi Error:", err);
