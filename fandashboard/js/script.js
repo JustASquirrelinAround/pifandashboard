@@ -98,14 +98,11 @@ function handleEditMode(li, pi) {
 
     try {
       await editPi(pi.ip, updatedPi);
-      showAlert("Pi updated successfully.", "success");
-    } catch (err) {
-      showAlert("Error updating Pi.", "danger", true);
-    }
-
-    try {
-      await editPi(pi.ip, updatedPi);
-      showAlert("Pi updated successfully.", "success");
+      if (apiReachable) {
+        showAlert("Pi updated successfully and is reachable.", "success");
+      } else {
+        showAlert("Pi updated, but is not reachable (offline or fan API unavailable).", "warning", true);
+      }
     } catch (err) {
       showAlert("Error updating Pi.", "danger", true);
     }
@@ -655,7 +652,15 @@ function createCard(pi) {
       </div>
     </div>
   `;
-  statusDiv.appendChild(card);
+  const cards = Array.from(document.querySelectorAll(".pi-card"));
+  const existingIndex = pis.findIndex(p => p.ip === pi.ip);
+  
+  // Insert card at the correct position
+  if (existingIndex >= 0 && existingIndex < cards.length) {
+    statusDiv.insertBefore(card, cards[existingIndex]);
+  } else {
+    statusDiv.appendChild(card); // fallback if index not found
+  }
 }
 
 function toggleChart(safeId, showChart) {
