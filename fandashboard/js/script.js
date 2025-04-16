@@ -44,7 +44,7 @@ function handleEditMode(li, pi) {
     <div class="col-12 col-md-4">
       <input type="text" class="form-control form-control-sm edit-ip" value="${pi.ip}" />
     </div>
-    <div class="col-12 col-md-4 d-flex gap-2 justify-content-md-start justify-content-center">
+    <div class="col-12 col-md-4 d-flex justify-content-md-end justify-content-center gap-2 ms-md-auto">
       <button class="btn btn-sm btn-success save-btn">
         <i class="bi bi-check-lg"></i>
       </button>
@@ -141,10 +141,10 @@ function renderPiList() {
       <span><strong>${pi.name}</strong> (${pi.ip})</span>
       <div>
         <button class="btn btn-sm btn-primary edit-btn" data-ip="${pi.ip}">
-          <i class="bi bi-pencil"></i> Edit
+          <i class="bi bi-pencil"></i>
         </button>
         <button class="btn btn-sm btn-danger delete-btn" data-ip="${pi.ip}">
-          <i class="bi bi-trash"></i> Delete
+          <i class="bi bi-trash"></i>
         </button>
       </div>
     `;
