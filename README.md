@@ -222,7 +222,7 @@ Then reload Nginx:
 sudo systemctl reload nginx
 ```
 
-## You can now access the dashboard via your Pi’s IP. 🎉🎉🎉
+## 🎉🎉 You can now access the dashboard via your Pi’s IP 🎉🎉
 
 ---
 
