@@ -22,11 +22,10 @@ whiptail --title "Pi Fan Dashboard Setup" \
 --msgbox "Welcome to the Pi Fan Dashboard Setup.\n\nThis tool will help you clone and install the required scripts and files.\nBased on your Raspberry Pi's role in the fan monitoring setup." 13 70
 
 # === Choose Role ===
-ROLE=$(whiptail --title "Select Pi Type" --menu "What type of Pi is this?" 15 60 3 \
+ROLE=$(whiptail --title "Select Pi Type" --menu "What type of Pi is this?" 15 75 3 \
 "fanonly" "Pi that only needs Fan Control + API" \
 "mainpi"  "Main Pi that runs Fan Control + Web Dashboard" \
-"webonly" "Pi that only hosts the Web Dashboard (no fan scripts)" \
-3>&1 1>&2 2>&3)
+"webonly" "Pi that only hosts the Web Dashboard (no fan scripts)")
 
 # === Confirm OS ===
 OS=$(whiptail --title "Select OS" --menu "Which OS is this Pi running?" 12 50 2 \
