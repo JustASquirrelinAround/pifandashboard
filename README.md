@@ -14,24 +14,23 @@
 
 ## 📚 Table of Contents
 
-- [Overview](#overview)
-- [Initial Setup](#initial-setup)
-- [Install on All Raspberry Pis](#install-on-all-raspberry-pis)
-  - [Fan Control Script](#fan-control-script)
-  - [Flask API for Fan Status](#flask-api-for-fan-status)
-- [Install on One Pi Only](#install-on-one-pi-only)
-  - [Nginx Install](#install-nginx)
-  - [Web Dashboard Setup](#web-dashboard-setup)
-  - [Pi Manager API](#pi-manager-api)
-  - [Nginx Configuration](#nginx-config)
-- [Dashboard Features](#dashboard-features)
-- [Optional Terminal Alias](#optional-terminal-alias)
-- [License](#license)
-- [Credits](#credits)
-- [More Details](#more-details)
+- Overview
+- Initial Setup
+- Install on All Raspberry Pis
+  - Fan Control Script
+  - Flask API for Fan Status
+- Install on One Pi Only
+  - Nginx Install
+  - Web Dashboard Setup
+  - Pi Manager API
+  - Nginx Configuration
+- Dashboard Features
+- Optional Terminal Alias
+- License
+- Credits
+- More Details
 
 ---
-<a name="overview" />
 
 ## 📦 Overview
 
@@ -41,7 +40,6 @@ This project lets you monitor and control CPU cooling fans across multiple Raspb
 > 🛑 Not compatible with **Raspberry Pi 5** if using the fan header.
 
 ---
-<a name="initial-setup" />
 
 ## 📥 Initial Setup (On All Raspberry Pis)
 
@@ -58,11 +56,8 @@ git clone https://github.com/JustASquirrelinAround/pifandashboard.git
 cd pifandashboard
 ```
 ---
-<a name="install-on-all-raspberry-pis" />
 
 # 🧰 Install on All Raspberry Pis
-
-<a name="fan-control-script" />
 
 ## 🔧 Install Fan Control Script
 
@@ -71,7 +66,6 @@ From the repo directory:
 ```bash
 bash install_fan_control.sh
 ```
-<a name="flask-api-for-fan-status" />
 
 ## 🌐 Install Flask API
 
@@ -82,11 +76,8 @@ bash install_fan_api.sh
 ```
 
 ---
-<a name="install-on-one-pi-only" />
 
 # 💻 Install on One Pi Only
-
-<a name="install-nginx" />
 
 ## 🌐 Install Nginx
 
@@ -95,7 +86,6 @@ If you're using **DietPi**:
 ```bash
 dietpi-software install 85
 ```
-<a name="web-dashboard-setup" />
 
 ## 🖥️ Web Dashboard Setup
 
@@ -104,14 +94,12 @@ Copy the dashboard folder into your web server root:
 ```bash
 sudo cp -r fandashboard/ /var/www/
 ```
-<a name="pi-manager-api" />
 
 ## 🔧 Install Pi Manager API (REQUIRED)
 
 ```bash
 bash install_pi_manager.sh
 ```
-<a name="nginx-config" />
 
 ## 🔧 Nginx Configuration
 
@@ -144,7 +132,6 @@ sudo systemctl reload nginx
 ## 🎉🎉 You can now access the dashboard via your Pi’s IP 🎉🎉
 
 ---
-<a name="dashboard-features" />
 
 ## 🖼️ Dashboard Features
 
@@ -157,7 +144,6 @@ sudo systemctl reload nginx
 - ✅ Summary: Online/Offline count and last updated time
 
 ---
-<a name="optional-terminal-alias" />
 
 ## 🖥️ (Optional) Terminal Command to Check Fan Status
 
@@ -181,14 +167,12 @@ CPU Temp: 40.9°C | Fan Speed: 28%
 ```
 
 ---
-<a name="license" />
 
 ## 📜 License
 
 MIT License. Free to use, modify, and contribute.
 
 ---
-<a name="credits" />
 
 ## 🙏 Credits
 
@@ -196,10 +180,10 @@ MIT License. Free to use, modify, and contribute.
 - Chart.js ([chartjs.org](https://www.chartjs.org/)), Bootstrap ([getbootstrap.com](https://getbootstrap.com/)), and DietPi ([dietpi.com](https://dietpi.com/)) for tools & ecosystem
 
 ---
-<a name="more-details" />
 
 ## 🧠 More Details
 
-See DETAILS.md for a full explanation of how the system works, including:
-	•	Architecture diagram
-	•	Description of each script and service
+See [`DETAILS.md`](DETAILS.md) for a full explanation of how the system works, including:
+
+- Architecture diagram  
+- Description of each script and service
