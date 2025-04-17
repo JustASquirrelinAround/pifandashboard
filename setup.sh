@@ -25,7 +25,8 @@ whiptail --title "Pi Fan Dashboard Setup" \
 ROLE=$(whiptail --title "Select Pi Type" --menu "What type of Pi is this?" 15 75 3 \
 "fanonly" "Pi that only needs Fan Control + API" \
 "mainpi"  "Main Pi that runs Fan Control + Web Dashboard" \
-"webonly" "Pi that only hosts the Web Dashboard (no fan scripts)")
+"webonly" "Pi that only hosts the Web Dashboard (no fan scripts)" \
+3>&1 1>&2 2>&3)
 
 # === Confirm OS ===
 OS=$(whiptail --title "Select OS" --menu "Which OS is this Pi running?" 12 50 2 \
