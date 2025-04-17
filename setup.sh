@@ -1,57 +1,52 @@
 #!/bin/bash
 
-# Check for whiptail
+# === Define Repo and Directory ===
+REPO="https://github.com/JustASquirrelinAround/pifandashboard.git"
+HOME_DIR="$HOME/pifandashboard"
+
+# Ensure whiptail is available
 if ! command -v whiptail &> /dev/null; then
-  echo "whiptail not found. Please install it with: sudo apt install whiptail"
-  exit 1
+  echo "Installing whiptail..."
+  sudo apt update && sudo apt install -y whiptail
 fi
 
-# Resolve the base path (directory where setup.sh is)
-BASE_DIR="$(cd "$(dirname "$0")" && pwd)"
-SCRIPT_DIR="$BASE_DIR/scripts"
-
-# Confirm scripts exist
-if [ ! -f "$SCRIPT_DIR/install_fan_control.sh" ] || [ ! -f "$SCRIPT_DIR/install_fan_api.sh" ]; then
-  whiptail --title "Error" --msgbox "Could not find the install scripts in $SCRIPT_DIR" 10 60
-  exit 1
+# === Ensure Git is Installed ===
+if ! command -v git &> /dev/null; then
+  echo "[INFO] Git not found. Installing..."
+  sudo apt update && sudo apt install -y git
 fi
 
-# Splash screen
-whiptail --title "Pi Fan Bulk Installer" --msgbox \
-"This tool will SSH into Raspberry Pis and install the fan controller and API scripts.\n\nYou will be prompted for each Pi's SSH password in the terminal." 12 60
+# === Welcome Message ===
+whiptail --title "Pi Fan Dashboard Setup" \
+--ok-button "Continue" \
+--msgbox "Welcome to the Pi Fan Dashboard Setup.\n\nThis tool will help you clone and install the required scripts and files based on your Raspberry Pi's role in the fan monitoring setup." 12 70
 
-while true; do
-  # Get target IP or hostname
-  PI_IP=$(whiptail --inputbox "Enter the IP address or hostname of the Raspberry Pi:" 10 60 3>&1 1>&2 2>&3) || exit
+# === Choose Role ===
+ROLE=$(whiptail --title "Select Pi Type" --menu "What type of Pi is this?" 15 60 2 \
+"fanonly" "Pi that only needs Fan Control + API" \
+"mainpi"  "Main Pi that runs Fan Control + Web Dashboard" \
+3>&1 1>&2 2>&3)
 
-  # SSH user
-  PI_USER=$(whiptail --inputbox "Enter the SSH username (default: pi):" 10 60 "pi" 3>&1 1>&2 2>&3) || exit
+# === Confirm OS ===
+OS=$(whiptail --title "Select OS" --menu "Which OS is this Pi running?" 12 50 2 \
+"dietpi" "DietPi (optimized and lightweight)" \
+"rpi"    "Raspberry Pi OS (Bullseye or later)" \
+3>&1 1>&2 2>&3)
 
-  # Confirm info
-  whiptail --yesno "Connect to:\n\nUser: $PI_USER\nHost: $PI_IP\n\nProceed?" 12 60 || continue
+# === Show Summary ===
+whiptail --title "Setup Summary" --msgbox "Role: $ROLE\nOS: $OS\n\nEverything will be cloned to:\n$HOME_DIR\n\nPress Continue to begin cloning." 12 60
 
-  # Run install scripts one by one
-  for SCRIPT_NAME in install_fan_control.sh install_fan_api.sh; do
-    SCRIPT_PATH="$SCRIPT_DIR/$SCRIPT_NAME"
-    whiptail --infobox "Sending and running $SCRIPT_NAME on $PI_IP...\nYou will be asked to enter the SSH password." 10 60
+# === Setup Sparse Checkout (to be implemented next) ===
+# mkdir -p "$HOME_DIR"
+# cd "$HOME_DIR"
+# git init
+# git remote add origin "$REPO"
+# git config core.sparseCheckout true
+# echo "<paths>" > .git/info/sparse-checkout
+# git pull origin main
 
-    # Copy the script to the Pi
-    scp "$SCRIPT_PATH" "$PI_USER@$PI_IP:/tmp/$SCRIPT_NAME"
-    if [ $? -ne 0 ]; then
-      whiptail --msgbox "Failed to copy $SCRIPT_NAME to $PI_IP. Aborting this Pi." 8 50
-      break
-    fi
-
-    # Run the script
-    ssh "$PI_USER@$PI_IP" "bash /tmp/$SCRIPT_NAME"
-    if [ $? -ne 0 ]; then
-      whiptail --msgbox "Failed to run $SCRIPT_NAME on $PI_IP. Aborting this Pi." 8 50
-      break
-    fi
-  done
-
-  whiptail --msgbox "Fan controller and API successfully installed on $PI_IP!" 8 50
-
-  # Ask if they want to install on another Pi
-  whiptail --yesno "Would you like to install on another Pi?" 8 50 || break
-done
+# === Placeholder ===
+echo "[INFO] Selected role: $ROLE"
+echo "[INFO] Selected OS: $OS"
+echo "[INFO] Repo: $REPO"
+echo "[INFO] Will clone into: $HOME_DIR"
