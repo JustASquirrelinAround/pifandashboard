@@ -4,65 +4,46 @@
 
 ---
 
+## 📸 Screenshots
+
+<img width="1315" alt="Dashboard Overview" src="https://github.com/user-attachments/assets/78818538-5f25-4642-952f-2d031c5d7192" />
+<img width="1323" alt="Chart View" src="https://github.com/user-attachments/assets/a8df093d-8d24-488a-971e-a12cb5fc5cc4" />
+<img width="815" alt="Edit Pi List Modal" src="https://github.com/user-attachments/assets/38375dba-bcf3-49bd-83cd-017e46aea32a" />
+
+---
+
+## 📚 Table of Contents
+
+- [Overview](#overview)
+- [Initial Setup](#initial-setup)
+- [Install on All Raspberry Pis](#install-on-all-raspberry-pis)
+  - [Fan Control Script](#fan-control-script)
+  - [Flask API for Fan Status](#flask-api-for-fan-status)
+- [Install on One Pi Only](#install-on-one-pi-only)
+  - [Nginx Install](#install-nginx)
+  - [Web Dashboard Setup](#web-dashboard-setup)
+  - [Pi Manager API](#pi-manager-api)
+  - [Nginx Configuration](#nginx-config)
+- [Dashboard Features](#dashboard-features)
+- [Optional Terminal Alias](#optional-terminal-alias)
+- [License](#license)
+- [Credits](#credits)
+- [More Details](#more-details)
+
+---
+<a name="overview" />
+
 ## 📦 Overview
 
-This project ties together:
-- A **Python-based PWM fan control script** running on each Raspberry Pi
-- A **Flask API** served from each Pi to provide real-time temperature, fan speed, CPU & memory usage
-- A centralized **Bootstrap/JavaScript dashboard** that polls all Pis and renders the data using Chart.js
+This project lets you monitor and control CPU cooling fans across multiple Raspberry Pis. One Pi hosts a dashboard that polls all other Pis for temperature, fan speed, and resource usage.
 
-> ✅ This setup is designed for **DietPi**, but should also work with **Raspberry Pi OS** with some manual adjustments (not currently documented).
-
-> 🛑 NOTE: Designed for **Raspberry Pi 3B** (including **3B+**) and **4B**, will <ins>**NOT**</ins> work with **Raspberry Pi 5** if you are using the fan header.
+> ✅ This setup is designed for **DietPi**, but it should also work with **Raspberry Pi OS** with minor adjustments (not currently documented).
+> 🛑 Not compatible with **Raspberry Pi 5** if using the fan header.
 
 ---
+<a name="initial-setup" />
 
-## 🧠 Architecture
-
-This project uses a modular design where each Raspberry Pi manages its own fan and exposes system stats via a local API. A centralized dashboard fetches these stats and presents them in real time.
-
-```plaintext
-┌────────────────────────────┐
-│   Raspberry Pi (per node)  │
-├────────────────────────────┤
-│ - Fan Controller           │ ← Python script (PWM based)
-│ - Monitors CPU temp        │
-│ - Sets fan PWM speed       │
-│ - Writes status file       │
-│ - Flask API Server         │ ← Serves /status JSON endpoint
-└────────────┬───────────────┘
-             │
-             ▼  (HTTP JSON request every 10s)
-┌────────────────────────────────────────────────────┐
-│          Web Dashboard (hosted on one Pi)          │
-├────────────────────────────────────────────────────┤
-│ - HTML + Bootstrap + Chart.js                      │
-│ - Polls each Pi for temperature, CPU, memory, fan  │
-│ - Displays history graph per Pi                    │
-│ - Mobile-friendly layout                           │
-└────────────────────────────────────────────────────┘
-```
-
----
-
-## 🌀 FanProportional.py
-
-A proportional PWM fan control script designed for 5V Noctua or similar fans using the Raspberry Pi GPIO pins.  
-**NOTE: 5V PWM Fans only!**
-
-### Features:
-- Proportional speed control between a min/max temperature
-- Writes the current temperature & fan speed to a local status file
-- Designed to run as a systemd service
-
-### Pins:
-- **5V** – Power  
-- **GND** – Ground  
-- **GPIO14** – PWM signal pin
-
----
-
-## 📥 Initial Setup (Clone Repo First)
+## 📥 Initial Setup (On All Raspberry Pis)
 
 Start by checking git is installed
 ```bash
@@ -76,53 +57,23 @@ Then clone this repository to your Pi:
 git clone https://github.com/JustASquirrelinAround/pifandashboard.git
 cd pifandashboard
 ```
-
-This will give you access to:
-- `install_fan_control.sh`
-- `install_fan_api.sh`
-- `fandashboard/` folder containing the web interface
-
 ---
+<a name="install-on-all-raspberry-pis" />
 
-## 🔧 Install Fan Control Script (on each Pi)
+# 🧰 Install on All Raspberry Pis
+
+<a name="fan-control-script" />
+
+## 🔧 Install Fan Control Script
 
 From the repo directory:
 
 ```bash
 bash install_fan_control.sh
 ```
+<a name="flask-api-for-fan-status" />
 
-This script installs:
-- Python requirements
-- `FanProportional.py` in `/mnt/dietpi_userdata/`
-- Systemd service to auto-start the fan controller
-
----
-
-## 🖥️ (Optional) Terminal Command to Check Fan Status
-
-You can add a simple shell alias to quickly view the current CPU temperature and fan speed from the terminal:
-
-```bash
-echo "alias fanstatus='cat /var/log/fan_status.txt'" >> ~/.bashrc
-source ~/.bashrc
-```
-
-Then just run:
-
-```bash
-fanstatus
-```
-
-Output:
-
-```
-CPU Temp: 40.9°C | Fan Speed: 28%
-```
-
----
-
-## 🌐 Install Flask API (on each Pi)
+## 🌐 Install Flask API
 
 From the repo directory:
 
@@ -130,69 +81,37 @@ From the repo directory:
 bash install_fan_api.sh
 ```
 
-This script:
-- Installs Flask
-- Sets up a Flask app to serve `/status` with JSON info
-- Installs it as a systemd service listening on port `10000`
-
 ---
+<a name="install-on-one-pi-only" />
 
-## 📋 JSON Output from Flask API
+# 💻 Install on One Pi Only
 
-Example response from each Pi:
-
-```json
-{
-  "temperature": 43.2,
-  "speed": 32,
-  "cpu": 21.4,
-  "memory": 35.1
-}
-```
-
-This is polled every 10 seconds by the frontend dashboard.
-
----
+<a name="install-nginx" />
 
 ## 🌐 Install Nginx
 
-If you're using **DietPi**, you can install Nginx easily via the built-in software tool:
+If you're using **DietPi**:
 
 ```bash
 dietpi-software install 85
 ```
-
----
+<a name="web-dashboard-setup" />
 
 ## 🖥️ Web Dashboard Setup
 
-Move the dashboard folder into your web server root:
+Copy the dashboard folder into your web server root:
 
 ```bash
 sudo cp -r fandashboard/ /var/www/
 ```
-
----
+<a name="pi-manager-api" />
 
 ## 🔧 Install Pi Manager API (REQUIRED)
-
-After copying the dashboard files, run the following from the repo directory:
 
 ```bash
 bash install_pi_manager.sh
 ```
-
-This script:
-- Creates a Flask API service for managing a `pi_list.json` file
-- Sets it up to run as a systemd service on port `10001`
-
-You can now use the **"Edit Pi List"** button in the top right of the dashboard to:
-- Add a Pi (name and IP)
-- Edit or remove Pis from the list and page
-
-> ⚠️ Pis managed via the UI are stored in `/var/www/fandashboard/pi_list.json` and persist across updates.
-
----
+<a name="nginx-config" />
 
 ## 🔧 Nginx Configuration
 
@@ -225,6 +144,7 @@ sudo systemctl reload nginx
 ## 🎉🎉 You can now access the dashboard via your Pi’s IP 🎉🎉
 
 ---
+<a name="dashboard-features" />
 
 ## 🖼️ Dashboard Features
 
@@ -237,20 +157,38 @@ sudo systemctl reload nginx
 - ✅ Summary: Online/Offline count and last updated time
 
 ---
+<a name="optional-terminal-alias" />
 
-## 📸 Screenshots
+## 🖥️ (Optional) Terminal Command to Check Fan Status
 
-<img width="1315" alt="Screenshot 2025-04-15 at 11 33 50 PM" src="https://github.com/user-attachments/assets/78818538-5f25-4642-952f-2d031c5d7192" />
-<img width="1323" alt="Screenshot 2025-04-15 at 11 33 34 PM" src="https://github.com/user-attachments/assets/a8df093d-8d24-488a-971e-a12cb5fc5cc4" />
-<img width="815" alt="Screenshot 2025-04-15 at 11 37 17 PM" src="https://github.com/user-attachments/assets/38375dba-bcf3-49bd-83cd-017e46aea32a" />
+You can add a simple shell alias to quickly view the current CPU temperature and fan speed from the terminal:
+
+```bash
+echo "alias fanstatus='cat /var/log/fan_status.txt'" >> ~/.bashrc
+source ~/.bashrc
+```
+
+Then just run:
+
+```bash
+fanstatus
+```
+
+Output:
+
+```
+CPU Temp: 40.9°C | Fan Speed: 28%
+```
 
 ---
+<a name="license" />
 
 ## 📜 License
 
 MIT License. Free to use, modify, and contribute.
 
 ---
+<a name="credits" />
 
 ## 🙏 Credits
 
@@ -258,3 +196,10 @@ MIT License. Free to use, modify, and contribute.
 - Chart.js ([chartjs.org](https://www.chartjs.org/)), Bootstrap ([getbootstrap.com](https://getbootstrap.com/)), and DietPi ([dietpi.com](https://dietpi.com/)) for tools & ecosystem
 
 ---
+<a name="more-details" />
+
+## 🧠 More Details
+
+See DETAILS.md for a full explanation of how the system works, including:
+	•	Architecture diagram
+	•	Description of each script and service
