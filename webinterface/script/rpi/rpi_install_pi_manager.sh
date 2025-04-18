@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Check if the service already exists
+if [ -f /etc/systemd/system/pimanager.service ]; then
+  echo "[INFO] pimanager.service already exists. Skipping installation."
+  exit 0
+fi
+
 echo "Creating Pi Manager Flask API script..."
 
 # Create the Python script in /mnt/dietpi_userdata

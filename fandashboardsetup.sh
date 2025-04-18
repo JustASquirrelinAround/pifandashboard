@@ -99,6 +99,43 @@ if [ $? -eq 0 ]; then
   whiptail --title "Clone Success" --msgbox "Files cloned successfully!\n\nProceeding to the next step." 10 60
   if whiptail --title "Continue Setup" --yesno "Do you want to continue with installation or quit?" 10 60; then
     echo "[INFO] Proceeding with installation..."
+
+    if [[ "$ROLE" == "fanonly" || "$ROLE" == "mainpi" ]]; then
+      if [ "$OS" == "dietpi" ]; then
+        bash "$HOME_DIR/fanscripts/dietpi/dietpi_install_fan_control.sh"
+        bash "$HOME_DIR/fanscripts/dietpi/dietpi_install_fan_api.sh"
+      else
+        bash "$HOME_DIR/fanscripts/rpi/rpi_install_fan_control.sh"
+        bash "$HOME_DIR/fanscripts/rpi/rpi_install_fan_api.sh"
+      fi
+    fi
+
+    if [[ "$ROLE" == "mainpi" || "$ROLE" == "webonly" ]]; then
+      echo "[INFO] Installing Nginx..."
+
+      if [ "$OS" == "dietpi" ]; then
+        dietpi-software install 85
+      else
+        sudo apt update && sudo apt install -y nginx
+      fi
+
+      echo "[INFO] Moving Web Dashboard to /var/www..."
+      sudo rm -rf /var/www/fandashboard
+      sudo mv "$HOME_DIR/webinterface/fandashboard" /var/www/
+
+      echo "[INFO] Configuring Nginx default site..."
+      NGINX_DEFAULT="/etc/nginx/sites-available/default"
+      sudo sed -i 's|root .*|root /var/www/fandashboard;|' "$NGINX_DEFAULT"
+      sudo sed -i 's|index .*|index index.html index.htm;|' "$NGINX_DEFAULT"
+      sudo systemctl restart nginx
+
+      if [ "$OS" == "dietpi" ]; then
+        bash "$HOME_DIR/webinterface/script/dietpi/dietpi_install_pi_manager.sh"
+      else
+        bash "$HOME_DIR/webinterface/script/rpi/rpi_install_pi_manager.sh"
+      fi
+    fi
+
   else
     echo "[INFO] User chose to quit after cloning files."
     exit 0

@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Check if the service already exists
+if [ -f /etc/systemd/system/fanapi.service ]; then
+  echo "[INFO] fanapi.service already exists. Skipping installation."
+  exit 0
+fi
+
 # Install required packages
 apt update
 apt install -y python3-flask python3-psutil python3-flask-cors

@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Check if the service already exists
+if [ -f /etc/systemd/system/fancontrol.service ]; then
+  echo "[INFO] fancontrol.service already exists. Skipping installation."
+  exit 0
+fi
+
 echo "Installing required Python GPIO package..."
 apt update
 apt install -y python3-rpi.gpio
