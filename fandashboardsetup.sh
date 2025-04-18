@@ -2,6 +2,13 @@
 
 # === Define Repo and Directory ===
 REPO="https://github.com/JustASquirrelinAround/pifandashboard.git"
+DRY_RUN=false
+for arg in "$@"; do
+  if [[ "$arg" == "--dry-run" ]]; then
+    DRY_RUN=true
+    echo "[INFO] Dry run mode enabled – will not execute install scripts after cloning."
+  fi
+done
 HOME_DIR="$HOME/pifandashboard"
 
 # Ensure whiptail is available
@@ -43,17 +50,42 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# === Show Summary ===
-whiptail --title "Setup Summary" --msgbox "Role: $ROLE\nOS: $OS\n\nEverything will be cloned to:\n$HOME_DIR\n\nPress Continue to begin cloning." 12 60
+# === Setup Sparse Checkout ===
 
-# === Setup Sparse Checkout (to be implemented next) ===
-# mkdir -p "$HOME_DIR"
-# cd "$HOME_DIR"
-# git init
-# git remote add origin "$REPO"
-# git config core.sparseCheckout true
-# echo "<paths>" > .git/info/sparse-checkout
-# git pull origin main
+mkdir -p "$HOME_DIR"
+cd "$HOME_DIR"
+git init
+git remote add origin "$REPO"
+git config core.sparseCheckout true
+
+# Set up sparse-checkout paths
+SPARSE_FILE=".git/info/sparse-checkout"
+echo "" > "$SPARSE_FILE"
+
+if [[ "$ROLE" == "fanonly" || "$ROLE" == "mainpi" ]]; then
+  if [ "$OS" == "dietpi" ]; then
+    echo "fanscripts/dietpi/*" >> "$SPARSE_FILE"
+  else
+    echo "fanscripts/rpi/*" >> "$SPARSE_FILE"
+  fi
+fi
+
+if [[ "$ROLE" == "mainpi" || "$ROLE" == "webonly" ]]; then
+  echo "webinterface/fandashboard/*" >> "$SPARSE_FILE"
+  if [ "$OS" == "dietpi" ]; then
+    echo "webinterface/script/dietpi/*" >> "$SPARSE_FILE"
+  else
+    echo "webinterface/script/rpi/*" >> "$SPARSE_FILE"
+  fi
+fi
+
+# Pull only necessary files
+git pull origin main
+
+if $DRY_RUN; then
+  echo "[INFO] Dry run complete. Skipping script execution."
+  exit 0
+fi
 
 # === Placeholder ===
 echo "[INFO] Selected role: $ROLE"
