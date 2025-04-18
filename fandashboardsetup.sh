@@ -1,12 +1,6 @@
 #!/bin/bash
 
-# === Handle Private Repo Token (if set) ===
-if [[ -z "$GITHUB_TOKEN" ]]; then
-  REPO="https://github.com/JustASquirrelinAround/pifandashboard.git"
-else
-  REPO="https://$GITHUB_TOKEN@github.com/JustASquirrelinAround/pifandashboard.git"
-  echo "[INFO] Using GitHub token for private repository access."
-fi
+REPO="https://github.com/JustASquirrelinAround/pifandashboard.git"
 DRY_RUN=false
 for arg in "$@"; do
   if [[ "$arg" == "--dry-run" ]]; then
@@ -63,17 +57,6 @@ else
   exec "$0" "$@"  # Restart script with same arguments
 fi
 
-# === Ask if Repository is Private ===
-if whiptail --title "Private Repository" --yesno "Is the GitHub repository private and requires a token?" 10 60; then
-  GITHUB_TOKEN=$(whiptail --title "Enter GitHub Token" --inputbox "Enter your GitHub Personal Access Token:" 10 60 3>&1 1>&2 2>&3)
-  if [ -z "$GITHUB_TOKEN" ]; then
-    echo "[ERROR] No token entered. Aborting."
-    exit 1
-  fi
-  REPO="https://${GITHUB_TOKEN}@github.com/JustASquirrelinAround/pifandashboard.git"
-else
-  REPO="https://github.com/JustASquirrelinAround/pifandashboard.git"
-fi
 
 # === Setup Sparse Checkout ===
 
