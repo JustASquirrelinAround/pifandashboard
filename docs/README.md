@@ -16,14 +16,6 @@
 
 - Overview
 - Initial Setup
-- Install on All Raspberry Pis
-  - Fan Control Script
-  - Flask API for Fan Status
-- Install on One Pi Only
-  - Nginx Install
-  - Web Dashboard Setup
-  - Pi Manager API
-  - Nginx Configuration
 - Dashboard Features
 - Optional Terminal Alias
 - License
@@ -32,102 +24,33 @@
 
 ---
 
-## 📦 Overview
+## 📥 Initial Setup
 
-This project lets you monitor and control CPU cooling fans across multiple Raspberry Pis. One Pi hosts a dashboard that polls all other Pis for temperature, fan speed, and resource usage.
+You can use the guided setup script to automatically install everything needed for your Pi Fan Dashboard.
 
-> ✅ This setup is designed for **DietPi**, but it should also work with **Raspberry Pi OS** with minor adjustments (not currently documented).
-> 🛑 Not compatible with **Raspberry Pi 5** if using the fan header.
+### 🚀 One-Line Installer
+
+Run this on any Raspberry Pi:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/JustASquirrelinAround/pifandashboard/main/fandashboardsetup.sh | bash
+```
+
+The script will guide you through:
+
+- 🌀 Installing the fan controller and API for Pis with fans
+- 🖥️ Setting up the web dashboard (on a main Pi or web-only Pi)
+- 📦 Cloning only the required files
+- ✅ Automatically handling DietPi or Raspberry Pi OS
+- 🧼 Optionally cleaning up install files
 
 ---
 
-## 📥 Initial Setup (On All Raspberry Pis)
+## 🔁 Updating the Dashboard
 
-Start by checking git is installed
-```bash
-sudo apt update
-sudo apt install git
-```
-
-Then clone this repository to your Pi:
-
-```bash
-git clone https://github.com/JustASquirrelinAround/pifandashboard.git
-cd pifandashboard
-```
----
-
-# 🧰 Install on All Raspberry Pis
-
-## 🔧 Install Fan Control Script
-
-From the repo directory:
-
-```bash
-bash install_fan_control.sh
-```
-
-## 🌐 Install Flask API
-
-From the repo directory:
-
-```bash
-bash install_fan_api.sh
-```
+To update the web interface, simply run the **Web Only** option in the setup script again. This will refresh the frontend files without affecting existing settings or the Pi list.
 
 ---
-
-# 💻 Install on One Pi Only
-
-## 🌐 Install Nginx
-
-If you're using **DietPi**:
-
-```bash
-dietpi-software install 85
-```
-
-## 🖥️ Web Dashboard Setup
-
-Copy the dashboard folder into your web server root:
-
-```bash
-sudo cp -r fandashboard/ /var/www/
-```
-
-## 🔧 Install Pi Manager API (REQUIRED)
-
-```bash
-bash install_pi_manager.sh
-```
-
-## 🔧 Nginx Configuration
-
-If you're using **Nginx**, update your `sites-available/default` config:
-
-> Located at /etc/nginix/sites-available
-
-```nginx
-server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
-
-    root /var/www/fandashboard;
-    index index.html;
-
-    server_name _;
-
-    location / {
-        try_files $uri $uri/ =404;
-    }
-}
-```
-
-Then reload Nginx:
-
-```bash
-sudo systemctl reload nginx
-```
 
 ## 🎉🎉 You can now access the dashboard via your Pi’s IP 🎉🎉
 
