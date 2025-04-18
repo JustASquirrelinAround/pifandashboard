@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# === Privilege Check ===
+# DietPi typically runs scripts as root. Enforce only if not already root.
+# Check if the script is run as root
+if [[ "$EUID" -ne 0 ]]; then
+  echo "[ERROR] This script must be run as root. Please use sudo or switch to the root user."
+  exit 1
+fi
+
 REPO="https://github.com/JustASquirrelinAround/pifandashboard.git"
 DRY_RUN=false
 for arg in "$@"; do
@@ -11,16 +19,16 @@ done
 HOME_DIR="$HOME/pifandashboard"
 
 # Ensure whiptail is available
-if ! command -v whiptail &> /dev/null; then
-  echo "Installing whiptail..."
-  sudo apt update && sudo apt install -y whiptail
-fi
+  if ! command -v whiptail &> /dev/null; then
+    echo "Installing whiptail..."
+    apt update && apt install -y whiptail
+  fi
 
 # === Ensure Git is Installed ===
-if ! command -v git &> /dev/null; then
-  echo "[INFO] Git not found. Installing..."
-  sudo apt update && sudo apt install -y git
-fi
+  if ! command -v git &> /dev/null; then
+    echo "[INFO] Git not found. Installing..."
+    apt update && apt install -y git
+  fi
 
 # === Welcome Message ===
 whiptail --title "Pi Fan Dashboard Setup" \
@@ -94,6 +102,9 @@ fi
 # Pull only necessary files
 git pull origin main
 
+INSTALL_LOG="/tmp/fandashboard_install.log"
+> "$INSTALL_LOG"
+
 echo ""
 if [ $? -eq 0 ]; then
   whiptail --title "Clone Success" --msgbox "Files cloned successfully!\n\nProceeding to the next step." 10 60
@@ -102,45 +113,73 @@ if [ $? -eq 0 ]; then
 
     if [[ "$ROLE" == "fanonly" || "$ROLE" == "mainpi" ]]; then
       if [ "$OS" == "dietpi" ]; then
-        bash "$HOME_DIR/fanscripts/dietpi/dietpi_install_fan_control.sh"
-        bash "$HOME_DIR/fanscripts/dietpi/dietpi_install_fan_api.sh"
+        bash "$HOME_DIR/fanscripts/dietpi/dietpi_install_fan_control.sh" 2>>"$INSTALL_LOG"
+        bash "$HOME_DIR/fanscripts/dietpi/dietpi_install_fan_api.sh" 2>>"$INSTALL_LOG"
       else
-        bash "$HOME_DIR/fanscripts/rpi/rpi_install_fan_control.sh"
-        bash "$HOME_DIR/fanscripts/rpi/rpi_install_fan_api.sh"
+        bash "$HOME_DIR/fanscripts/rpi/rpi_install_fan_control.sh" 2>>"$INSTALL_LOG"
+        bash "$HOME_DIR/fanscripts/rpi/rpi_install_fan_api.sh" 2>>"$INSTALL_LOG"
       fi
     fi
 
     if [[ "$ROLE" == "mainpi" || "$ROLE" == "webonly" ]]; then
-      echo "[INFO] Installing Nginx..."
-
-      if [ "$OS" == "dietpi" ]; then
-        dietpi-software install 85
-      else
-        sudo apt update && sudo apt install -y nginx
+      echo "[INFO] Ensuring rsync is installed..."
+      if ! command -v rsync &> /dev/null; then
+        echo "[INFO] Installing rsync..."
+        apt update && apt install -y rsync 2>>"$INSTALL_LOG"
       fi
 
-      echo "[INFO] Moving Web Dashboard to /var/www..."
-      sudo rm -rf /var/www/fandashboard
-      sudo mv "$HOME_DIR/webinterface/fandashboard" /var/www/
-
+      echo "[INFO] Syncing Web Dashboard to /var/www/fandashboard..."
+      rsync -av "$HOME_DIR/webinterface/fandashboard/" /var/www/fandashboard/ 2>>"$INSTALL_LOG"
+      
       echo "[INFO] Configuring Nginx default site..."
       NGINX_DEFAULT="/etc/nginx/sites-available/default"
-      sudo sed -i 's|root .*|root /var/www/fandashboard;|' "$NGINX_DEFAULT"
-      sudo sed -i 's|index .*|index index.html index.htm;|' "$NGINX_DEFAULT"
-      sudo systemctl restart nginx
+      if grep -q "root /var/www/fandashboard;" "$NGINX_DEFAULT"; then
+        echo "[INFO] Nginx already configured to use /var/www/fandashboard. Skipping update and restart."
+      else
+        sed -i 's|root .*|root /var/www/fandashboard;|' "$NGINX_DEFAULT" 2>>"$INSTALL_LOG"
+        sed -i 's|index .*|index index.html index.htm;|' "$NGINX_DEFAULT" 2>>"$INSTALL_LOG"
+        systemctl restart nginx 2>>"$INSTALL_LOG"
+        echo "[INFO] Nginx configuration updated and service restarted."
+      fi
 
       if [ "$OS" == "dietpi" ]; then
-        bash "$HOME_DIR/webinterface/script/dietpi/dietpi_install_pi_manager.sh"
+        bash "$HOME_DIR/webinterface/script/dietpi/dietpi_install_pi_manager.sh" 2>>"$INSTALL_LOG"
       else
-        bash "$HOME_DIR/webinterface/script/rpi/rpi_install_pi_manager.sh"
+        bash "$HOME_DIR/webinterface/script/rpi/rpi_install_pi_manager.sh" 2>>"$INSTALL_LOG"
       fi
+    fi
+
+    if [ -s "$INSTALL_LOG" ]; then
+      ERROR_MSG=$(cat "$INSTALL_LOG")
+      whiptail --title "Install Errors Detected" --msgbox "The following errors occurred during installation:\n\n$ERROR_MSG\n\nPlease review the output above to resolve issues." 20 70
+      exit 1
+    fi
+
+    # === Final Success Confirmation ===
+    whiptail --title "Setup Complete" --msgbox "Installation completed successfully!\n\nYour Pi has been set up based on the selected role." 10 60
+
+    # === Ask if user wants to remove install files ===
+    if whiptail --title "Clean Up Installer Files" --yesno "Do you want to delete the cloned install files from $HOME_DIR?" 10 60; then
+      rm -rf "$HOME_DIR"
+      echo "[INFO] Installer files removed."
+    else
+      echo "[INFO] Installer files retained at $HOME_DIR"
+    fi
+
+    # === Final Message Based on Role ===
+    if [[ "$ROLE" == "mainpi" || "$ROLE" == "webonly" ]]; then
+      IP_ADDR=$(hostname -I | awk '{print $1}')
+      whiptail --title "Web Interface Ready" --msgbox "You can now access the Fan Dashboard from:\n\nhttp://$IP_ADDR\n\nUse any browser on the same network." 10 60
+    else
+      whiptail --title "Fan Controller Active" --msgbox "The Pi Fan Controller is now running and regulating your Pi's temperature using PWM." 10 60
     fi
 
   else
     echo "[INFO] User chose to quit after cloning files."
     exit 0
-  fi
-else
+    fi
+    
+  else
   whiptail --title "Clone Error" --msgbox "There was an error cloning the repository.\n\nPlease check your internet connection and try again." 10 60
   exit 1
 fi
