@@ -26,37 +26,40 @@ fi
 whiptail --title "Pi Fan Dashboard Setup" \
 --msgbox "Welcome to the Pi Fan Dashboard Setup.\n\nThis tool will help you clone and install the required scripts and files based on your Raspberry Pi's role in the fan monitoring setup.\n\nCreated by JustASquirrelinAround" 13 70
 
-# === Choose Role ===
-ROLE=$(whiptail --title "Select Pi Type" --menu "What type of Pi is this?" 15 75 3 \
-"fanonly" "Pi that only needs Fan Control + API" \
-"mainpi"  "Main Pi that runs Fan Control + Web Dashboard" \
-"webonly" "Pi that only hosts the Web Dashboard (no fan scripts)" \
-3>&1 1>&2 2>&3)
+confirmed=false
+while [ "$confirmed" = false ]; do
 
-if [ $? -ne 0 ]; then
-  echo "[INFO] Setup cancelled by user."
-  exit 1
-fi
+  # === Choose Role ===
+  ROLE=$(whiptail --title "Select Pi Type" --menu "What type of Pi is this?" 15 75 3 \
+    "fanonly" "Pi that only needs Fan Control + API" \
+    "mainpi"  "Main Pi that runs Fan Control + Web Dashboard" \
+    "webonly" "Pi that only hosts the Web Dashboard (no fan scripts)" \
+    3>&1 1>&2 2>&3)
 
-# === Confirm OS ===
-OS=$(whiptail --title "Select OS" --menu "Which OS is this Pi running?" 12 50 2 \
-"dietpi" "DietPi" \
-"rpi"    "Raspberry Pi OS" \
-3>&1 1>&2 2>&3)
+  if [ $? -ne 0 ]; then
+    echo "[INFO] Setup cancelled by user."
+    exit 1
+  fi
 
-if [ $? -ne 0 ]; then
-  echo "[INFO] Setup cancelled by user."
-  exit 1
-fi
+  # === Confirm OS ===
+  OS=$(whiptail --title "Select OS" --menu "Which OS is this Pi running?" 12 50 2 \
+    "dietpi" "DietPi" \
+    "rpi"    "Raspberry Pi OS" \
+    3>&1 1>&2 2>&3)
 
-# === Summary of Selections ===
-if whiptail --title "Confirm Selections" --yesno "You selected:\n\nRole: $ROLE\nOS: $OS\n\nContinue with these options?" 12 60; then
-  echo "[INFO] Proceeding with selected options..."
-else
-  echo "[INFO] Restarting setup..."
-  SCRIPT_PATH="$(realpath "${BASH_SOURCE[0]}")"
-  exec "$SCRIPT_PATH" "$@"  # Restart script with reliable absolute path
-fi
+  if [ $? -ne 0 ]; then
+    echo "[INFO] Setup cancelled by user."
+    exit 1
+  fi
+
+  # === Summary of Selections ===
+  if whiptail --title "Confirm Selections" --yesno "You selected:\n\nRole: $ROLE\nOS: $OS\n\nContinue with these options?" 12 60; then
+    confirmed=true
+  else
+    echo "[INFO] Going back to selection menu..."
+  fi
+
+done
 
 
 # === Setup Sparse Checkout ===
