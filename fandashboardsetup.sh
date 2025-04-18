@@ -30,7 +30,7 @@ confirmed=false
 while [ "$confirmed" = false ]; do
 
   # === Choose Role ===
-  ROLE=$(whiptail --title "Select Pi Type" --menu "What type of Pi is this?" 15 75 3 \
+  ROLE=$(whiptail --title "Select Pi Type" --nocancel --menu "What type of Pi is this?" 15 75 3 \
     "fanonly" "Pi that only needs Fan Control + API" \
     "mainpi"  "Main Pi that runs Fan Control + Web Dashboard" \
     "webonly" "Pi that only hosts the Web Dashboard (no fan scripts)" \
@@ -42,7 +42,7 @@ while [ "$confirmed" = false ]; do
   fi
 
   # === Confirm OS ===
-  OS=$(whiptail --title "Select OS" --menu "Which OS is this Pi running?" 12 50 2 \
+  OS=$(whiptail --title "Select OS" --nocancel --menu "Which OS is this Pi running?" 12 50 2 \
     "dietpi" "DietPi" \
     "rpi"    "Raspberry Pi OS" \
     3>&1 1>&2 2>&3)
@@ -95,20 +95,15 @@ fi
 git pull origin main
 
 echo ""
-echo "[INFO] Cloned files:"
-tree -L 2 "$HOME_DIR" || ls -R "$HOME_DIR"
-echo ""
-
-if whiptail --title "Continue Setup" --yesno "Files cloned successfully. Would you like to continue to the next part of the setup?" 10 60; then
-  echo "[INFO] Proceeding to next setup step..."
-  # Future install logic would go here
+if [ $? -eq 0 ]; then
+  whiptail --title "Clone Success" --msgbox "Files cloned successfully!\n\nProceeding to the next step." 10 60
+  if whiptail --title "Continue Setup" --yesno "Do you want to continue with installation or quit?" 10 60; then
+    echo "[INFO] Proceeding with installation..."
+  else
+    echo "[INFO] User chose to quit after cloning files."
+    exit 0
+  fi
 else
-  echo "[INFO] Setup halted by user after cloning."
-  exit 0
+  whiptail --title "Clone Error" --msgbox "There was an error cloning the repository.\n\nPlease check your internet connection and try again." 10 60
+  exit 1
 fi
-
-# === Placeholder ===
-echo "[INFO] Selected role: $ROLE"
-echo "[INFO] Selected OS: $OS"
-echo "[INFO] Repo: $REPO"
-echo "[INFO] Will clone into: $HOME_DIR"
