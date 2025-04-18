@@ -52,10 +52,6 @@ To update the web interface, simply run the **Web Only** option in the setup scr
 
 ---
 
-## 🎉🎉 You can now access the dashboard via your Pi’s IP 🎉🎉
-
----
-
 ## 🖼️ Dashboard Features
 
 - ✅ Live CPU Temp & Fan Speed per Pi
