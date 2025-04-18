@@ -54,7 +54,8 @@ if whiptail --title "Confirm Selections" --yesno "You selected:\n\nRole: $ROLE\n
   echo "[INFO] Proceeding with selected options..."
 else
   echo "[INFO] Restarting setup..."
-  exec "$0" "$@"  # Restart script with same arguments
+  SCRIPT_PATH="$(realpath "${BASH_SOURCE[0]}")"
+  exec "$SCRIPT_PATH" "$@"  # Restart script with reliable absolute path
 fi
 
 
