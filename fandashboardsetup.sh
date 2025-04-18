@@ -19,7 +19,7 @@ fi
 # === Welcome Message ===
 whiptail --title "Pi Fan Dashboard Setup" \
 --ok-button "Continue" \
---msgbox "Welcome to the Pi Fan Dashboard Setup.\n\nThis tool will help you clone and install the required scripts and files.\nBased on your Raspberry Pi's role in the fan monitoring setup." 13 70
+--msgbox "Welcome to the Pi Fan Dashboard Setup.\n\nThis tool will help you clone and install the required scripts and files based on your Raspberry Pi's role in the fan monitoring setup.\n\nCreated by JustASquirrelinAround" 13 70
 
 # === Choose Role ===
 ROLE=$(whiptail --title "Select Pi Type" --menu "What type of Pi is this?" 15 75 3 \
