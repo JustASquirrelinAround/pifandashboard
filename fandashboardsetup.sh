@@ -18,7 +18,6 @@ fi
 
 # === Welcome Message ===
 whiptail --title "Pi Fan Dashboard Setup" \
---ok-button "Continue" \
 --msgbox "Welcome to the Pi Fan Dashboard Setup.\n\nThis tool will help you clone and install the required scripts and files based on your Raspberry Pi's role in the fan monitoring setup.\n\nCreated by JustASquirrelinAround" 13 70
 
 # === Choose Role ===
@@ -28,11 +27,21 @@ ROLE=$(whiptail --title "Select Pi Type" --menu "What type of Pi is this?" 15 75
 "webonly" "Pi that only hosts the Web Dashboard (no fan scripts)" \
 3>&1 1>&2 2>&3)
 
+if [ $? -ne 0 ]; then
+  echo "[INFO] Setup cancelled by user."
+  exit 1
+fi
+
 # === Confirm OS ===
 OS=$(whiptail --title "Select OS" --menu "Which OS is this Pi running?" 12 50 2 \
 "dietpi" "DietPi" \
 "rpi"    "Raspberry Pi OS" \
 3>&1 1>&2 2>&3)
+
+if [ $? -ne 0 ]; then
+  echo "[INFO] Setup cancelled by user."
+  exit 1
+fi
 
 # === Show Summary ===
 whiptail --title "Setup Summary" --msgbox "Role: $ROLE\nOS: $OS\n\nEverything will be cloned to:\n$HOME_DIR\n\nPress Continue to begin cloning." 12 60
