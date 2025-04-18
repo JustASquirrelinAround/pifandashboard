@@ -5,7 +5,7 @@ apt update
 apt install -y python3-rpi.gpio
 
 echo "Creating Python fan control script..."
-cat << 'EOF' > /mnt/dietpi_userdata/FanProportional.py
+cat << 'EOF' > $HOME/pifandashboard/FanProportional.py
 # This script provides proportional PWM control for a 5V PWM fan
 # connected to a Raspberry Pi using GPIO14.
 # Originally created by: Michael Klements
@@ -66,7 +66,7 @@ while True:
     time.sleep(5)
 EOF
 
-chmod +x /mnt/dietpi_userdata/FanProportional.py
+chmod +x $HOME/pifandashboard/FanProportional.py
 
 echo "Creating systemd service..."
 cat << EOF > /etc/systemd/system/fancontrol.service
@@ -76,7 +76,7 @@ After=multi-user.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /mnt/dietpi_userdata/FanProportional.py
+ExecStart=/usr/bin/python3 $HOME/pifandashboard/FanProportional.py
 Restart=always
 User=root
 

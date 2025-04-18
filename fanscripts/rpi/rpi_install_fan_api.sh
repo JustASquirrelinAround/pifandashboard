@@ -5,7 +5,7 @@ apt update
 apt install -y python3-flask python3-psutil python3-flask-cors
 
 # Create the Python script that runs the Flask API on each Pi
-cat << 'EOF' > /mnt/dietpi_userdata/fan_status_api.py
+cat << 'EOF' > $HOME/pifandashboard/fan_status_api.py
 # fan_status_api.py
 # -----------------
 # A lightweight Flask API that serves real-time CPU temperature, fan speed,
@@ -67,7 +67,7 @@ if __name__ == "__main__":
 EOF
 
 # Make sure the script is executable
-chmod +x /mnt/dietpi_userdata/fan_status_api.py
+chmod +x $HOME/pifandashboard/fan_status_api.py
 
 # Create the systemd service file
 cat << 'EOF' > /etc/systemd/system/fanapi.service
@@ -77,7 +77,7 @@ After=multi-user.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /mnt/dietpi_userdata/fan_status_api.py
+ExecStart=/usr/bin/python3 $HOME/pifandashboard/fan_status_api.py
 Restart=always
 User=root
 

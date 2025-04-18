@@ -3,7 +3,7 @@
 echo "Creating Pi Manager Flask API script..."
 
 # Create the Python script in /mnt/dietpi_userdata
-cat << 'EOF' > /mnt/dietpi_userdata/pi_manager_api.py
+cat << 'EOF' > $HOME/pifandashboard/pi_manager_api.py
 # pi_manager_api.py
 # Flask API for dynamically managing a list of Raspberry Pis for dashboard use.
 # Provides endpoints to read and update a JSON file with {name, ip} entries.
@@ -118,7 +118,7 @@ if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10001)
 EOF
 
-chmod +x /mnt/dietpi_userdata/pi_manager_api.py
+chmod +x $HOME/pifandashboard/pi_manager_api.py
 
 echo "Creating systemd service file..."
 
@@ -130,7 +130,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /mnt/dietpi_userdata/pi_manager_api.py
+ExecStart=/usr/bin/python3 $HOME/pifandashboard/pi_manager_api.py
 Restart=always
 User=root
 
