@@ -1,7 +1,12 @@
 #!/bin/bash
 
-# === Define Repo and Directory ===
-REPO="https://github.com/JustASquirrelinAround/pifandashboard.git"
+# === Handle Private Repo Token (if set) ===
+if [[ -z "$GITHUB_TOKEN" ]]; then
+  REPO="https://github.com/JustASquirrelinAround/pifandashboard.git"
+else
+  REPO="https://$GITHUB_TOKEN@github.com/JustASquirrelinAround/pifandashboard.git"
+  echo "[INFO] Using GitHub token for private repository access."
+fi
 DRY_RUN=false
 for arg in "$@"; do
   if [[ "$arg" == "--dry-run" ]]; then
@@ -82,8 +87,16 @@ fi
 # Pull only necessary files
 git pull origin main
 
-if $DRY_RUN; then
-  echo "[INFO] Dry run complete. Skipping script execution."
+echo ""
+echo "[INFO] Cloned files:"
+tree -L 2 "$HOME_DIR" || ls -R "$HOME_DIR"
+echo ""
+
+if whiptail --title "Continue Setup" --yesno "Files cloned successfully. Would you like to continue to the next part of the setup?" 10 60; then
+  echo "[INFO] Proceeding to next setup step..."
+  # Future install logic would go here
+else
+  echo "[INFO] Setup halted by user after cloning."
   exit 0
 fi
 
