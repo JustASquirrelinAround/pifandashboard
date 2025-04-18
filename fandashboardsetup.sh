@@ -30,7 +30,7 @@ confirmed=false
 while [ "$confirmed" = false ]; do
 
   # === Choose Role ===
-  ROLE=$(whiptail --title "Select Pi Type" --nocancel --menu "What type of Pi is this?" 15 75 3 \
+  ROLE=$(whiptail --title "Select Pi Type" --menu "What type of Pi is this?" 15 75 3 \
     "fanonly" "Pi that only needs Fan Control + API" \
     "mainpi"  "Main Pi that runs Fan Control + Web Dashboard" \
     "webonly" "Pi that only hosts the Web Dashboard (no fan scripts)" \
@@ -42,7 +42,7 @@ while [ "$confirmed" = false ]; do
   fi
 
   # === Confirm OS ===
-  OS=$(whiptail --title "Select OS" --nocancel --menu "Which OS is this Pi running?" 12 50 2 \
+  OS=$(whiptail --title "Select OS" --menu "Which OS is this Pi running?" 12 50 2 \
     "dietpi" "DietPi" \
     "rpi"    "Raspberry Pi OS" \
     3>&1 1>&2 2>&3)
