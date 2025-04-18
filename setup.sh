@@ -30,8 +30,8 @@ ROLE=$(whiptail --title "Select Pi Type" --menu "What type of Pi is this?" 15 75
 
 # === Confirm OS ===
 OS=$(whiptail --title "Select OS" --menu "Which OS is this Pi running?" 12 50 2 \
-"dietpi" "DietPi (optimized and lightweight)" \
-"rpi"    "Raspberry Pi OS (Bullseye or later)" \
+"dietpi" "DietPi" \
+"rpi"    "Raspberry Pi OS" \
 3>&1 1>&2 2>&3)
 
 # === Show Summary ===
