@@ -18,11 +18,11 @@ This setup is designed specifically for controlling fans via the Raspberry Pi's 
 
 ## 📚 Table of Contents
 
-- Overview
 - Wiring Guide
-- Initial Setup
+- Installer
 - Dashboard Features
 - Optional Terminal Alias
+- Uninstaller
 - License
 - Credits
 - More Details
@@ -53,16 +53,15 @@ There are many 3D-printable and off-the-shelf options available depending on you
 
 ---
 
-## 📥 Initial Setup
+## 📥 Installer
 
 You can use the guided setup script to automatically install everything needed for your Pi Fan Dashboard.
-
-### 🚀 One-Line Installer
 
 Run this on any Raspberry Pi:
 
 ```bash
 curl -O https://raw.githubusercontent.com/JustASquirrelinAround/pifandashboard/main/fandashboardsetup.sh
+
 sudo bash fandashboardsetup.sh
 ```
 
@@ -121,12 +120,11 @@ CPU Temp: 40.9°C | Fan Speed: 28%
 
 If you ever need to remove the Pi Fan Dashboard components, you can use the following uninstall script. This will allow you to selectively remove the fan scripts, Pi manager, and web interface depending on your setup.
 
-### 🧼 One-Line Uninstaller
-
 Run this on the Pi you wish to uninstall from:
 
 ```bash
 curl -O https://raw.githubusercontent.com/JustASquirrelinAround/pifandashboard/main/fandashboarduninstaller.sh
+
 sudo bash fandashboarduninstaller.sh
 ```
 
