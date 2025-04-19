@@ -27,7 +27,7 @@ function run_if_exists() {
 }
 
 OS=$(whiptail --title "Select OS" --radiolist \
-"Choose the operating system of this Pi:" 12 60 2 \
+"Choose the operating system of this Pi:" 12 70 2 \
 "DietPi" "DietPi system (default for DietPi installs)" ON \
 "RaspberryPiOS" "Standard Raspberry Pi OS" OFF \
 3>&1 1>&2 2>&3)
@@ -44,7 +44,7 @@ REMOVE_PI_MANAGER_SERVICE=false
 REMOVE_WEB_INTERFACE=false
 
 CHOICE=$(whiptail --title "Select What to Uninstall" --checklist \
-"Choose components to remove:" 15 60 5 \
+"Choose components to remove:" 15 70 5 \
 "FanControlService" "Remove PWM fan control service" OFF \
 "FanAPIService" "Remove fan status Flask API" OFF \
 "PiManagerService" "Remove Pi Manager API" OFF \
