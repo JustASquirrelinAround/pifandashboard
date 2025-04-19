@@ -5,6 +5,14 @@
 # Allows selective removal of services, Python scripts, and/or web interface
 # Created by JustASquirrelinAround
 
+# === Privilege Check ===
+# DietPi typically runs scripts as root. Enforce only if not already root.
+# Check if the script is run as root
+if [[ "$EUID" -ne 0 ]]; then
+  echo "[ERROR] This script must be run as root. Please use sudo or switch to the root user."
+  exit 1
+fi
+
 set -e
 
 # ===== Utility Functions =====
