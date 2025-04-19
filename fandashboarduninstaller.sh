@@ -8,16 +8,6 @@
 set -e
 
 # ===== Utility Functions =====
-function detect_os() {
-  if [ -f /DietPi/dietpi.txt ]; then
-    echo "DietPi"
-  elif grep -q "Raspbian" /etc/os-release; then
-    echo "RaspberryPiOS"
-  else
-    echo "Unsupported"
-  fi
-}
-
 function confirm() {
   whiptail --title "$1" --yesno "$2" 10 60
   return $?
@@ -36,10 +26,14 @@ function run_if_exists() {
   fi
 }
 
-OS=$(detect_os)
+OS=$(whiptail --title "Select OS" --radiolist \
+"Choose the operating system of this Pi:" 12 60 2 \
+"DietPi" "DietPi system (default for DietPi installs)" ON \
+"RaspberryPiOS" "Standard Raspberry Pi OS" OFF \
+3>&1 1>&2 2>&3)
 
-if [[ "$OS" == "Unsupported" ]]; then
-  info_box "Unsupported OS" "This uninstaller only supports DietPi and Raspberry Pi OS."
+if [ -z "$OS" ]; then
+  info_box "Cancelled" "You cancelled the OS selection. Exiting..."
   exit 1
 fi
 
@@ -65,22 +59,31 @@ CHOICE=$(whiptail --title "Select What to Uninstall" --checklist \
 # ===== Perform Removals =====
 if $REMOVE_FAN_SERVICE; then
   run_if_exists "fancontrol.service"
-  rm -f /mnt/dietpi_userdata/FanProportional.py
-  rm -f /home/*/FanProportional.py 2>/dev/null || true
+  if [[ "$OS" == "DietPi" ]]; then
+    rm -f /mnt/dietpi_userdata/FanProportional.py
+  else
+    rm -f /home/*/FanProportional.py 2>/dev/null || true
+  fi
   echo "[INFO] Fan control script and service removed"
 fi
 
 if $REMOVE_API_SERVICE; then
   run_if_exists "fanstatusapi.service"
-  rm -f /mnt/dietpi_userdata/fan_status_api.py
-  rm -f /home/*/fan_status_api.py 2>/dev/null || true
+  if [[ "$OS" == "DietPi" ]]; then
+    rm -f /mnt/dietpi_userdata/fan_status_api.py
+  else
+    rm -f /home/*/fan_status_api.py 2>/dev/null || true
+  fi
   echo "[INFO] Fan API script and service removed"
 fi
 
 if $REMOVE_PI_MANAGER_SERVICE; then
   run_if_exists "pimanagerapi.service"
-  rm -f /mnt/dietpi_userdata/pi_manager_api.py
-  rm -f /home/*/pi_manager_api.py 2>/dev/null || true
+  if [[ "$OS" == "DietPi" ]]; then
+    rm -f /mnt/dietpi_userdata/pi_manager_api.py
+  else
+    rm -f /home/*/pi_manager_api.py 2>/dev/null || true
+  fi
   echo "[INFO] Pi Manager script and service removed"
 fi
 
