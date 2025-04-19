@@ -9,13 +9,6 @@ if [[ "$EUID" -ne 0 ]]; then
 fi
 
 REPO="https://github.com/JustASquirrelinAround/pifandashboard.git"
-DRY_RUN=false
-for arg in "$@"; do
-  if [[ "$arg" == "--dry-run" ]]; then
-    DRY_RUN=true
-    echo "[INFO] Dry run mode enabled – will not execute install scripts after cloning."
-  fi
-done
 HOME_DIR="$HOME/pifandashboard"
 
 # Ensure whiptail is available
