@@ -60,6 +60,18 @@ CHOICE=$(whiptail --title "Select What to Uninstall" --checklist \
 [[ $CHOICE == *"PiManagerService"* ]] && REMOVE_PI_MANAGER_SERVICE=true
 [[ $CHOICE == *"WebInterface"* ]] && REMOVE_WEB_INTERFACE=true
 
+# ===== Show Summary and Confirm ====
+SUMMARY_MSG="You selected to uninstall:\n"
+$REMOVE_FAN_SERVICE && SUMMARY_MSG+="• Fan Control Service\n"
+$REMOVE_API_SERVICE && SUMMARY_MSG+="• Fan API Service\n"
+$REMOVE_PI_MANAGER_SERVICE && SUMMARY_MSG+="• Pi Manager API Service\n"
+$REMOVE_WEB_INTERFACE && SUMMARY_MSG+="• Web Interface (/var/www/fandashboard)\n"
+
+if ! whiptail --title "Confirm Uninstall" --yesno "$SUMMARY_MSG\n\nDo you want to proceed?" 15 70; then
+  info_box "Uninstall Cancelled" "No changes have been made. Exiting..."
+  exit 0
+fi
+
 # ===== Perform Removals =====
 if $REMOVE_FAN_SERVICE; then
   run_if_exists "fancontrol.service"
