@@ -41,7 +41,7 @@ The script will guide you through:
 - 🌀 Installing the fan controller and API for Pis with fans
 - 🖥️ Setting up the web dashboard (on a main Pi or web-only Pi)
 - 📦 Cloning only the required files
-- ✅ Automatically handling DietPi or Raspberry Pi OS
+- ✅ Automatically handle DietPi or Raspberry Pi OS
 - 🧼 Optionally cleaning up install files
 
 ---
@@ -84,6 +84,26 @@ Output:
 ```
 CPU Temp: 40.9°C | Fan Speed: 28%
 ```
+
+---
+
+## ❌ Uninstall Instructions
+
+If you ever need to remove the Pi Fan Dashboard components, you can use the following uninstall script. This will allow you to selectively remove the fan scripts, Pi manager, and web interface depending on your setup.
+
+### 🧼 One-Line Uninstaller
+
+Run this on the Pi you wish to uninstall from:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/JustASquirrelinAround/pifandashboard/main/uninstall_fandashboard.sh | sudo bash
+```
+
+This script will:
+
+- 📋 Ask what you'd like to uninstall (Fan scripts, Pi manager, Web interface)
+- ✅ Automatically handle DietPi or Raspberry Pi OS
+- 🧼 Clean up related files and services
 
 ---
 
