@@ -33,7 +33,8 @@ You can use the guided setup script to automatically install everything needed f
 Run this on any Raspberry Pi:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/JustASquirrelinAround/pifandashboard/main/fandashboardsetup.sh | sudo bash
+curl -O https://raw.githubusercontent.com/JustASquirrelinAround/pifandashboard/main/fandashboardsetup.sh
+sudo bash fandashboardsetup.sh
 ```
 
 The script will guide you through:
@@ -96,7 +97,8 @@ If you ever need to remove the Pi Fan Dashboard components, you can use the foll
 Run this on the Pi you wish to uninstall from:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/JustASquirrelinAround/pifandashboard/main/uninstall_fandashboard.sh | sudo bash
+curl -O https://raw.githubusercontent.com/JustASquirrelinAround/pifandashboard/main/fandashboarduninstaller.sh
+sudo bash fandashboarduninstaller.sh
 ```
 
 This script will:
