@@ -2,6 +2,10 @@
 
 🌬️ A multi-Pi dashboard to monitor and control CPU cooling fans using PWM, with real-time status, history graphs, and a responsive web interface.
 
+💡 **Recommended Hardware:**  
+For best results, use **Noctua NF-A4x10 5V PWM Fans**. 
+This setup is designed specifically for controlling fans via the Raspberry Pi's GPIO pins using PWM.
+
 ---
 
 ## 📸 Screenshots
@@ -15,12 +19,37 @@
 ## 📚 Table of Contents
 
 - Overview
+- Wiring Guide
 - Initial Setup
 - Dashboard Features
 - Optional Terminal Alias
 - License
 - Credits
 - More Details
+
+---
+
+### 🔌 Wiring Guide
+
+Connect your 4-pin 5V PWM fan to the Raspberry Pi using the following pinout:
+
+```plaintext
+| Fan Wire           | Connects To (GPIO Header)      | Description             |
+|--------------------|--------------------------------|-------------------------|
+| **Red (5V)**       | Pin **2** or **4**             | 5V Power                |
+| **Black (Ground)** | Pin **6**, **9**, **14**, etc. | Ground                  |
+| **Yellow (Tach)**  | *(NOT USED)*                   | *(NOT USED)*            |
+| **Blue (PWM)**     | Pin **8 (GPIO14)**             | PWM Control Signal      |
+```
+
+> ✅ Only **3 wires** are needed for this project: **Red, Black, Blue**
+
+### 🔧 Fan Mounting
+
+🛠️ A proper **fan mount** is required to securely attach your PWM fan to the Raspberry Pi or your case.  
+There are many 3D-printable and off-the-shelf options available depending on your Pi model and enclosure.
+
+🔎 **Tip:** Search online (e.g., Thingiverse or Printables) for "Raspberry Pi fan mount" to find one that suits your setup best.
 
 ---
 
