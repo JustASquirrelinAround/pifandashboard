@@ -6,6 +6,9 @@
 For best results, use **Noctua NF-A4x10 5V PWM Fans**. 
 This setup is designed specifically for controlling fans via the Raspberry Pi's GPIO pins using PWM.
 
+✅ Designed for **Raspberry Pi 3B and B+** along with **Raspberry Pi 4**
+❌ Does not work with the **Raspberry 5** fan header
+
 ---
 
 ## 📸 Screenshots
