@@ -39,19 +39,23 @@ The dashboard (hosted on one Pi) polls each API every 10s and visualizes the dat
 
 ---
 
-## 📁 Folder Structure
+## 📁 Web Interface Folder Structure
 
 ```
-pifandashboard/
-├── fandashboard/                # Dashboard website UI
-│   ├── index.html
+fandashboard/
+├── js/                
+│   ├── bootstrap.bundle.min.js
 │   ├── script.js
-│   └── js/chart.js              # Chart.js library
-├── install_fan_control.sh       # Fan controller installer
-├── install_fan_api.sh           # Flask API installer
-├── install_pi_manager.sh        # Pi Manager (edit Pis via UI)
-├── README.md                    # Main instructions
-└── DETAILS.md                   # This file
+│   └── chart.js
+├── css/  
+│   ├── fonts/
+│   │   ├── bootstrap-icons.woff     
+│   │   ├── bootstrap-icons.woff2           
+│   ├── bootstrap-icons.min.css
+│   ├── bootstrap.min.css
+│   └── styles.css               
+├── index.html
+└── pi_list.json
 ```
 
 ---
