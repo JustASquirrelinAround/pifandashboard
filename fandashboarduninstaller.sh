@@ -31,8 +31,8 @@ whiptail --title "Pi Fan Dashboard Uninstaller" --msgbox \
 "Welcome to the Pi Fan Dashboard Uninstaller.\n\nThis tool allows you to selectively remove services, scripts, and the web interface for the Pi Fan Dashboard system.\n\nCreated by JustASquirrelinAround" 12 70
 
 OS=$(whiptail --title "Select OS" --radiolist \
-"Choose the operating system of this Pi:" 12 67 2 \
-"DietPi" "DietPi system (default for DietPi installs)" ON \
+"Choose the operating system of this Pi:" 12 68 2 \
+"DietPi" "DietPi system (default for DietPi installs) " ON \
 "RaspberryPiOS" "Standard Raspberry Pi OS" OFF \
 3>&1 1>&2 2>&3)
 
