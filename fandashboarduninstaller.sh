@@ -26,6 +26,10 @@ function run_if_exists() {
   fi
 }
 
+# ===== Welcome Message =====
+whiptail --title "Pi Fan Dashboard Uninstaller" --msgbox \
+"Welcome to the Pi Fan Dashboard Uninstaller.\n\nThis tool allows you to selectively remove services, scripts, and the web interface for the Pi Fan Dashboard system.\n\nCreated by JustASquirrelinAround" 12 70
+
 OS=$(whiptail --title "Select OS" --radiolist \
 "Choose the operating system of this Pi:" 12 70 2 \
 "DietPi" "DietPi system (default for DietPi installs)" ON \
