@@ -48,11 +48,11 @@ REMOVE_PI_MANAGER_SERVICE=false
 REMOVE_WEB_INTERFACE=false
 
 CHOICE=$(whiptail --title "Select What to Uninstall" --checklist \
-"Choose components to remove:" 15 80 5 \
+"Choose components to remove:" 15 77 5 \
 "FanControlService" "Remove PWM fan control service" OFF \
 "FanAPIService" "Remove fan status Flask API" OFF \
 "PiManagerService" "Remove Pi Manager API" OFF \
-"WebInterface" "Remove web interface from /var/www/fandashboard" OFF \
+"WebInterface" "Remove web interface from /var/www/fandashboard " OFF \
 3>&1 1>&2 2>&3)
 
 [[ $CHOICE == *"FanControlService"* ]] && REMOVE_FAN_SERVICE=true
