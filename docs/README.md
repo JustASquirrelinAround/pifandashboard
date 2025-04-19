@@ -40,9 +40,9 @@ Connect your 4-pin 5V PWM fan to the Raspberry Pi using the following pinout:
 ```plaintext
 | Fan Wire           | Connects To (GPIO Header)      | Description             |
 |--------------------|--------------------------------|-------------------------|
-| **Yellow (5V)**       | Pin **2** or **4**             | 5V Power                |
+| **Yellow (5V)**    | Pin **2** or **4**             | 5V Power                |
 | **Black (Ground)** | Pin **6**, **9**, **14**, etc. | Ground                  |
-| **Green (Tach)**  | *(NOT USED)*                   | *(NOT USED)*            |
+| **Green (Tach)**   | *(NOT USED)*                   | *(NOT USED)*            |
 | **Blue (PWM)**     | Pin **8 (GPIO14)**             | PWM Control Signal      |
 ```
 
