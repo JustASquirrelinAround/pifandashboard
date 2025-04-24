@@ -67,9 +67,13 @@ done
 
 mkdir -p "$HOME_DIR"
 cd "$HOME_DIR"
-git init
-git remote add origin "$REPO"
-git config core.sparseCheckout true
+if [ ! -d "$HOME_DIR/.git" ]; then
+  git init
+  if ! git remote get-url origin &>/dev/null; then
+    git remote add origin "$REPO"
+  fi
+  git config core.sparseCheckout true
+fi
 
 # Set up sparse-checkout paths
 SPARSE_FILE=".git/info/sparse-checkout"
@@ -90,6 +94,13 @@ if [[ "$ROLE" == "mainpi" || "$ROLE" == "webonly" ]]; then
   else
     echo "webinterface/script/rpi/*" >> "$SPARSE_FILE"
   fi
+fi
+
+# Check internet connection before pulling from GitHub
+if ! ping -c 1 github.com &>/dev/null; then
+  whiptail --title "Network Error" --msgbox \
+  "Unable to reach GitHub. Please check your internet connection and try again." 10 60
+  exit 1
 fi
 
 # Pull only necessary files
