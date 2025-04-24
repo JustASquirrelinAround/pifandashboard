@@ -135,12 +135,20 @@ if [ $? -eq 0 ]; then
       
       # === Post-Install Setup for Raspberry Pi OS ===
       if [ "$OS" == "rpi" ]; then
-        # Ensure nginx service is enabled at boot
+        # Check if Nginx is enabled
         if ! systemctl is-enabled nginx &> /dev/null; then
-          echo "[INFO] Enabling Nginx service at boot..."
-          systemctl enable nginx 2>>"$INSTALL_LOG"
+          echo "[INFO] Nginx is not enabled. Enabling and starting..."
+          systemctl enable nginx && systemctl start nginx 2>>"$INSTALL_LOG"
         else
-          echo "[INFO] Nginx service already enabled."
+          echo "[INFO] Nginx service is already enabled."
+        
+          # Check if Nginx is running
+          if ! systemctl is-active nginx &> /dev/null; then
+            echo "[INFO] Nginx is enabled but not running. Starting..."
+            systemctl start nginx 2>>"$INSTALL_LOG"
+          else
+            echo "[INFO] Nginx is already running."
+          fi
         fi
       
         # Adjust ownership and permissions of /var/www
