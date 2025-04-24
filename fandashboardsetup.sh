@@ -121,6 +121,40 @@ if [ $? -eq 0 ]; then
         apt update && apt install -y rsync 2>>"$INSTALL_LOG"
       fi
 
+      echo "[INFO] Checking if Nginx is installed..."
+      if ! command -v nginx &> /dev/null; then
+        echo "[INFO] Nginx not found. Installing..."
+        if [ "$OS" == "dietpi" ]; then
+          dietpi-software install 85 2>>"$INSTALL_LOG"
+        else
+          apt update && apt install -y nginx 2>>"$INSTALL_LOG"
+        fi
+      else
+        echo "[INFO] Nginx is already installed."
+      fi
+      
+      # === Post-Install Setup for Raspberry Pi OS ===
+      if [ "$OS" == "rpi" ]; then
+        # Ensure nginx service is enabled at boot
+        if ! systemctl is-enabled nginx &> /dev/null; then
+          echo "[INFO] Enabling Nginx service at boot..."
+          systemctl enable nginx 2>>"$INSTALL_LOG"
+        else
+          echo "[INFO] Nginx service already enabled."
+        fi
+      
+        # Adjust ownership and permissions of /var/www
+        echo "[INFO] Setting web root permissions..."
+        chown -R www-data:www-data /var/www 2>>"$INSTALL_LOG"
+        chmod -R 755 /var/www 2>>"$INSTALL_LOG"
+      
+        # Open firewall for HTTP if UFW is installed and active
+        if command -v ufw &> /dev/null && ufw status | grep -q "Status: active"; then
+          echo "[INFO] Allowing Nginx traffic through UFW..."
+          ufw allow 'Nginx Full' 2>>"$INSTALL_LOG" || true
+        fi
+      fi
+
       echo "[INFO] Syncing Web Dashboard to /var/www/fandashboard..."
       rsync -av "$HOME_DIR/webinterface/fandashboard/" /var/www/fandashboard/ 2>>"$INSTALL_LOG"
       
