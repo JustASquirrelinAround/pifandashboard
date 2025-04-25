@@ -132,6 +132,16 @@ if [ $? -eq 0 ]; then
         apt update && apt install -y rsync 2>>"$INSTALL_LOG"
       fi
 
+      if [ -d "/etc/pihole" ]; then
+        if whiptail --title "Pi-hole Detected - Potential Conflict" --yesno \
+          "Pi-hole is already installed on this system and uses its own built-in web server.\n\nInstalling another web server like Nginx may interfere with Pi-hole’s interface or functionality.\n\nIf you choose to continue and Pi-hole breaks, it will be up to you to fix or reinstall it.\n\nAre you sure you want to continue anyway?" 15 70; then
+          echo "[WARNING] User chose to proceed despite Pi-hole conflict risk."
+        else
+          echo "[INFO] Installation aborted to avoid conflict with Pi-hole."
+          exit 1
+        fi
+      fi
+
       echo "[INFO] Checking if Nginx is installed..."
       if ! command -v nginx &> /dev/null; then
         echo "[INFO] Nginx not found. Installing..."
