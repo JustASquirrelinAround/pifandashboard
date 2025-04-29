@@ -65,9 +65,9 @@ while [ "$confirmed" = false ]; do
   SUMMARY="You selected:\n\nRole: $ROLE\nOS: $OS"
   if [ "$OS" == "rpi" ]; then
     if [ "$USE_VENV" == true ]; then
-      SUMMARY="$SUMMARY\nVENV: \033[1;31mYES\033[0m"
+      SUMMARY="$SUMMARY\nVENV: YES (Python Virtual Environment)"
     else
-      SUMMARY="$SUMMARY\nVENV: NO"
+      SUMMARY="$SUMMARY\nVENV: NO (Standard Install)"
     fi
   fi
 
