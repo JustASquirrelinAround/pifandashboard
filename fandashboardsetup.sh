@@ -62,7 +62,14 @@ while [ "$confirmed" = false ]; do
   fi
 
   # === Summary of Selections ===
-  if whiptail --title "Confirm Selections" --yesno "You selected:\n\nRole: $ROLE\nOS: $OS\n\nContinue with these options?" 12 60; then
+  if [ "$OS" == "rpi" ]; then
+    VENV_CHOICE="VENV: $( [ "$USE_VENV" == true ] && echo 'Yes' || echo 'No' )"
+    CONFIRM_MSG="You selected:\n\nRole: $ROLE\nOS: $OS\n$VENV_CHOICE\n\nContinue with these options?"
+  else
+    CONFIRM_MSG="You selected:\n\nRole: $ROLE\nOS: $OS\n\nContinue with these options?"
+  fi
+
+  if whiptail --title "Confirm Selections" --yesno "$CONFIRM_MSG" 12 60; then
     confirmed=true
   else
     echo "[INFO] Going back to selection menu..."
