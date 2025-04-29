@@ -71,6 +71,8 @@ while [ "$confirmed" = false ]; do
     fi
   fi
 
+  SUMMARY="$SUMMARY\n\nDo you want to continue and pull the required files?"
+
   if whiptail --title "Confirm Selections" --yesno "$(echo -e "$SUMMARY")" 15 70; then
     confirmed=true
   else
