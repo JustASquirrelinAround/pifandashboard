@@ -53,6 +53,14 @@ while [ "$confirmed" = false ]; do
     exit 1
   fi
 
+  if [ "$OS" == "rpi" ]; then
+    if whiptail --title "Python Virtual Environment Option" --yesno "Do you want to use a Python virtual environment (venv) for the Fan Dashboard scripts?\n\nRecommended for systems with Pi-hole or multiple Python environments.\n\nSelect 'No' to use the standard setup." 15 70; then
+      USE_VENV=true
+    else
+      USE_VENV=false
+    fi
+  fi
+
   # === Summary of Selections ===
   if whiptail --title "Confirm Selections" --yesno "You selected:\n\nRole: $ROLE\nOS: $OS\n\nContinue with these options?" 12 60; then
     confirmed=true
@@ -83,7 +91,11 @@ if [[ "$ROLE" == "fanonly" || "$ROLE" == "mainpi" ]]; then
   if [ "$OS" == "dietpi" ]; then
     echo "fanscripts/dietpi/*" >> "$SPARSE_FILE"
   else
-    echo "fanscripts/rpi/*" >> "$SPARSE_FILE"
+    if [ "$USE_VENV" == true ]; then
+      echo "fanscripts/rpi/venv/*" >> "$SPARSE_FILE"
+    else
+      echo "fanscripts/rpi/*" >> "$SPARSE_FILE"
+    fi
   fi
 fi
 
@@ -92,7 +104,11 @@ if [[ "$ROLE" == "mainpi" || "$ROLE" == "webonly" ]]; then
   if [ "$OS" == "dietpi" ]; then
     echo "webinterface/script/dietpi/*" >> "$SPARSE_FILE"
   else
-    echo "webinterface/script/rpi/*" >> "$SPARSE_FILE"
+    if [ "$USE_VENV" == true ]; then
+      echo "webinterface/script/rpi/venv/*" >> "$SPARSE_FILE"
+    else
+      echo "webinterface/script/rpi/*" >> "$SPARSE_FILE"
+    fi
   fi
 fi
 
@@ -120,8 +136,13 @@ if [ $? -eq 0 ]; then
         bash "$HOME_DIR/fanscripts/dietpi/dietpi_install_fan_control.sh" 2>>"$INSTALL_LOG"
         bash "$HOME_DIR/fanscripts/dietpi/dietpi_install_fan_api.sh" 2>>"$INSTALL_LOG"
       else
-        bash "$HOME_DIR/fanscripts/rpi/rpi_install_fan_control.sh" 2>>"$INSTALL_LOG"
-        bash "$HOME_DIR/fanscripts/rpi/rpi_install_fan_api.sh" 2>>"$INSTALL_LOG"
+        if [ "$USE_VENV" == true ]; then
+          bash "$HOME_DIR/fanscripts/rpi/venv/rpi_install_fan_control_venv.sh" 2>>"$INSTALL_LOG"
+          bash "$HOME_DIR/fanscripts/rpi/venv/rpi_install_fan_api_venv.sh" 2>>"$INSTALL_LOG"
+        else
+          bash "$HOME_DIR/fanscripts/rpi/rpi_install_fan_control.sh" 2>>"$INSTALL_LOG"
+          bash "$HOME_DIR/fanscripts/rpi/rpi_install_fan_api.sh" 2>>"$INSTALL_LOG"
+        fi
       fi
     fi
 
@@ -201,7 +222,11 @@ if [ $? -eq 0 ]; then
       if [ "$OS" == "dietpi" ]; then
         bash "$HOME_DIR/webinterface/script/dietpi/dietpi_install_pi_manager.sh" 2>>"$INSTALL_LOG"
       else
-        bash "$HOME_DIR/webinterface/script/rpi/rpi_install_pi_manager.sh" 2>>"$INSTALL_LOG"
+        if [ "$USE_VENV" == true ]; then
+          bash "$HOME_DIR/webinterface/script/rpi/venv/rpi_install_pi_manager_venv.sh" 2>>"$INSTALL_LOG"
+        else
+          bash "$HOME_DIR/webinterface/script/rpi/rpi_install_pi_manager.sh" 2>>"$INSTALL_LOG"
+        fi
       fi
     fi
 
