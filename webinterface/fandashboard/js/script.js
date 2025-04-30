@@ -16,7 +16,7 @@
   License: MIT
 */
 
-const flaskPort = 10001; // Port of your Flask Pi Manager API
+const flaskPort = ${PI_MANAGER_PORT}; // Port of your Flask Pi Manager API
 let pis = []; // Global list for dashboard + modal
 let justAddedOfflineIp = null;
 let currentlyEditingItem = null;
