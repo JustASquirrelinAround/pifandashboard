@@ -81,7 +81,17 @@ while [ "$confirmed" = false ]; do
     else
       while true; do
         FAN_API_PORT=$(whiptail --inputbox "Enter Fan API port (1024-65535):" 10 60 "$DEFAULT_FAN_PORT" 3>&1 1>&2 2>&3)
+        if [ $? -ne 0 ]; then
+          echo "[INFO] Port entry cancelled, restarting setup..."
+          confirmed=false
+          continue 2
+        fi
         PI_MANAGER_PORT=$(whiptail --inputbox "Enter PI Manager API port (1024-65535):" 10 60 "$DEFAULT_PI_PORT" 3>&1 1>&2 2>&3)
+        if [ $? -ne 0 ]; then
+          echo "[INFO] Port entry cancelled, restarting setup..."
+          confirmed=false
+          continue 2
+        fi
         if [[ ! $FAN_API_PORT =~ ^[0-9]+$ ]] || [[ ! $PI_MANAGER_PORT =~ ^[0-9]+$ ]]; then
           whiptail --msgbox "Ports must be numeric." 8 40
           continue
@@ -92,7 +102,18 @@ while [ "$confirmed" = false ]; do
           continue
         fi
         if is_port_in_use $FAN_API_PORT || is_port_in_use $PI_MANAGER_PORT; then
-          whiptail --msgbox "One or both ports are in use. Choose different ports." 8 50
+          MSG="Port status:\n"
+          if is_port_in_use $FAN_API_PORT; then
+            MSG="$MSG -> $FAN_API_PORT (in use)\n"
+          else
+            MSG="$MSG    $FAN_API_PORT (available)\n"
+          fi
+          if is_port_in_use $PI_MANAGER_PORT; then
+            MSG="$MSG -> $PI_MANAGER_PORT (in use)\n"
+          else
+            MSG="$MSG    $PI_MANAGER_PORT (available)\n"
+          fi
+          whiptail --msgbox "$(echo -e "$MSG\nChoose different ports.")" 12 60
           continue
         fi
         break
@@ -102,7 +123,17 @@ while [ "$confirmed" = false ]; do
     whiptail --msgbox "Default ports $DEFAULT_FAN_PORT or $DEFAULT_PI_PORT are already in use. Please enter custom ports." 10 60
     while true; do
       FAN_API_PORT=$(whiptail --inputbox "Enter Fan API port (1024-65535):" 10 60 "" 3>&1 1>&2 2>&3)
+      if [ $? -ne 0 ]; then
+        echo "[INFO] Port entry cancelled, restarting setup..."
+        confirmed=false
+        continue 2
+      fi
       PI_MANAGER_PORT=$(whiptail --inputbox "Enter PI Manager API port (1024-65535):" 10 60 "" 3>&1 1>&2 2>&3)
+      if [ $? -ne 0 ]; then
+        echo "[INFO] Port entry cancelled, restarting setup..."
+        confirmed=false
+        continue 2
+      fi
       if [[ ! $FAN_API_PORT =~ ^[0-9]+$ ]] || [[ ! $PI_MANAGER_PORT =~ ^[0-9]+$ ]]; then
         whiptail --msgbox "Ports must be numeric." 8 40; continue
       fi
@@ -111,7 +142,19 @@ while [ "$confirmed" = false ]; do
         whiptail --msgbox "Ports must be between 1024 and 65535." 8 50; continue
       fi
       if is_port_in_use $FAN_API_PORT || is_port_in_use $PI_MANAGER_PORT; then
-        whiptail --msgbox "One or both ports are in use. Choose different ports." 8 50; continue
+        MSG="Port status:\n"
+        if is_port_in_use $FAN_API_PORT; then
+          MSG="$MSG -> $FAN_API_PORT (in use)\n"
+        else
+          MSG="$MSG    $FAN_API_PORT (available)\n"
+        fi
+        if is_port_in_use $PI_MANAGER_PORT; then
+          MSG="$MSG -> $PI_MANAGER_PORT (in use)\n"
+        else
+          MSG="$MSG    $PI_MANAGER_PORT (available)\n"
+        fi
+        whiptail --msgbox "$(echo -e "$MSG\nChoose different ports.")" 12 60
+        continue
       fi
       break
     done
