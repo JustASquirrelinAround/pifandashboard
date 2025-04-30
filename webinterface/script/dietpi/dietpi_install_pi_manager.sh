@@ -1,5 +1,7 @@
 #!/bin/bash
 
+PORT="${1:-10001}"
+
 # Check if the service already exists
 if [ -f /etc/systemd/system/pimanager.service ]; then
   echo "[INFO] pimanager.service already exists. Skipping installation."
@@ -9,7 +11,7 @@ fi
 echo "Creating Pi Manager Flask API script..."
 
 # Create the Python script in /mnt/dietpi_userdata
-cat << 'EOF' > /mnt/dietpi_userdata/pi_manager_api.py
+cat << EOF > /mnt/dietpi_userdata/pi_manager_api.py
 # pi_manager_api.py
 # Flask API for dynamically managing a list of Raspberry Pis for dashboard use.
 # Provides endpoints to read and update a JSON file with {name, ip} entries.
@@ -121,7 +123,7 @@ def edit_pi():
 # Run the app
 if __name__ == "__main__":
     init_pi_list()
-    app.run(host="0.0.0.0", port=10001)
+    app.run(host="0.0.0.0", port=${PORT})
 EOF
 
 chmod +x /mnt/dietpi_userdata/pi_manager_api.py
@@ -151,4 +153,4 @@ systemctl enable pimanager.service
 systemctl start pimanager.service
 
 echo ""
-echo "Pi Manager Flask API is now running on port 10001"
+echo "Pi Manager Flask API is now running on port ${PORT}"

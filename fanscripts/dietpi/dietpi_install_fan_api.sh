@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Allow passing a custom port (defaults to 10000)
+PORT="${1:-10000}"
+
 # Check if the service already exists
 if [ -f /etc/systemd/system/fanapi.service ]; then
   echo "[INFO] fanapi.service already exists. Skipping installation."
@@ -11,7 +14,7 @@ apt update
 apt install -y python3-flask python3-psutil python3-flask-cors
 
 # Create the Python script that runs the Flask API on each Pi
-cat << 'EOF' > /mnt/dietpi_userdata/fan_status_api.py
+cat << EOF > /mnt/dietpi_userdata/fan_status_api.py
 # fan_status_api.py
 # -----------------
 # A lightweight Flask API that serves real-time CPU temperature, fan speed,
@@ -67,9 +70,9 @@ def status():
         # Return an error message with status 500 if anything fails
         return jsonify({"error": str(e)}), 500
 
-# Run the Flask app on all network interfaces, port 10000
+# Run the Flask app on all network interfaces, using the passed-in port
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    app.run(host="0.0.0.0", port=${PORT})
 EOF
 
 # Make sure the script is executable
@@ -95,3 +98,6 @@ EOF
 systemctl daemon-reload
 systemctl enable fanapi.service
 systemctl start fanapi.service
+
+echo ""
+echo "Fan Status API deployed and running on port ${PORT}"
