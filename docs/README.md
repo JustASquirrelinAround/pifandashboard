@@ -64,7 +64,7 @@ You can use the guided setup script to automatically install everything needed f
 Run this on any Raspberry Pi:
 
 ```bash
-curl -O https://raw.githubusercontent.com/JustASquirrelinAround/pifandashboard/main/fandashboardsetup.sh
+curl -LO https://github.com/JustASquirrelinAround/pifandashboard/releases/latest/download/fandashboardsetup.sh
 
 sudo bash fandashboardsetup.sh
 ```
