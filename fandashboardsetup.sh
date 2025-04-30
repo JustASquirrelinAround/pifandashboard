@@ -104,14 +104,14 @@ while [ "$confirmed" = false ]; do
         if is_port_in_use $FAN_API_PORT || is_port_in_use $PI_MANAGER_PORT; then
           MSG="Port status:\n"
           if is_port_in_use $FAN_API_PORT; then
-            MSG="$MSG -> $FAN_API_PORT (in use)\n"
+            MSG="$MSG -> Fan API Port ($FAN_API_PORT) (in use)\n"
           else
-            MSG="$MSG    $FAN_API_PORT (available)\n"
+            MSG="$MSG    Fan API Port ($FAN_API_PORT) (available)\n"
           fi
           if is_port_in_use $PI_MANAGER_PORT; then
-            MSG="$MSG -> $PI_MANAGER_PORT (in use)\n"
+            MSG="$MSG -> PI Manager Port ($PI_MANAGER_PORT) (in use)\n"
           else
-            MSG="$MSG    $PI_MANAGER_PORT (available)\n"
+            MSG="$MSG    PI Manager Port ($PI_MANAGER_PORT) (available)\n"
           fi
           whiptail --msgbox "$(echo -e "$MSG\nChoose different ports.")" 12 60
           continue
@@ -120,7 +120,18 @@ while [ "$confirmed" = false ]; do
       done
     fi
   else
-    whiptail --msgbox "Default ports $DEFAULT_FAN_PORT or $DEFAULT_PI_PORT are already in use. Please enter custom ports." 10 60
+    MSG="Default port status:\n"
+    if is_port_in_use $DEFAULT_FAN_PORT; then
+      MSG="$MSG -> Fan API Port ($DEFAULT_FAN_PORT) (in use)\n"
+    else
+      MSG="$MSG    Fan API Port ($DEFAULT_FAN_PORT) (available)\n"
+    fi
+    if is_port_in_use $DEFAULT_PI_PORT; then
+      MSG="$MSG -> PI Manager Port ($DEFAULT_PI_PORT) (in use)\n"
+    else
+      MSG="$MSG    PI Manager Port ($DEFAULT_PI_PORT) (available)\n"
+    fi
+    whiptail --msgbox "$(echo -e "$MSG\nPlease enter custom ports.")" 12 60
     while true; do
       FAN_API_PORT=$(whiptail --inputbox "Enter Fan API port (1024-65535):" 10 60 "" 3>&1 1>&2 2>&3)
       if [ $? -ne 0 ]; then
@@ -144,14 +155,14 @@ while [ "$confirmed" = false ]; do
       if is_port_in_use $FAN_API_PORT || is_port_in_use $PI_MANAGER_PORT; then
         MSG="Port status:\n"
         if is_port_in_use $FAN_API_PORT; then
-          MSG="$MSG -> $FAN_API_PORT (in use)\n"
+          MSG="$MSG -> Fan API Port ($FAN_API_PORT) (in use)\n"
         else
-          MSG="$MSG    $FAN_API_PORT (available)\n"
+          MSG="$MSG    Fan API Port ($FAN_API_PORT) (available)\n"
         fi
         if is_port_in_use $PI_MANAGER_PORT; then
-          MSG="$MSG -> $PI_MANAGER_PORT (in use)\n"
+          MSG="$MSG -> PI Manager Port ($PI_MANAGER_PORT) (in use)\n"
         else
-          MSG="$MSG    $PI_MANAGER_PORT (available)\n"
+          MSG="$MSG    PI Manager Port ($PI_MANAGER_PORT) (available)\n"
         fi
         whiptail --msgbox "$(echo -e "$MSG\nChoose different ports.")" 12 60
         continue
