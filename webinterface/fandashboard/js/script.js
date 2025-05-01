@@ -42,12 +42,13 @@ function handleEditMode(li, pi) {
     if (cancelBtn) cancelBtn.click();
   }
   currentlyEditingItem = li;
-  // Create input fields pre-filled with current values
+  // Create input fields pre-filled with current values (name, ip, port)
   li.innerHTML = `
   <div class="d-flex flex-wrap justify-content-between w-100 align-items-center">
     <div class="d-flex gap-1">
-      <input type="text" class="form-control form-control-sm edit-name flex-grow-1" style="max-width: 250px;" value="${pi.name}" />
-      <input type="text" class="form-control form-control-sm edit-ip flex-grow-1" style="max-width: 250px;" value="${pi.ip}" />
+      <input type="text" class="form-control form-control-sm edit-name flex-grow-1" style="max-width: 200px;" value="${pi.name}" />
+      <input type="text" class="form-control form-control-sm edit-ip flex-grow-1" style="max-width: 200px;" value="${pi.ip}" />
+      <input type="number" class="form-control form-control-sm edit-port flex-grow-1" style="max-width: 100px;" min="1024" max="65535" value="${pi.port}" />
     </div>
     <div>
       <button class="btn btn-sm btn-success save-btn">
@@ -63,6 +64,12 @@ function handleEditMode(li, pi) {
   li.querySelector(".save-btn").addEventListener("click", async () => {
     const updatedName = li.querySelector(".edit-name").value.trim();
     const updatedIp = li.querySelector(".edit-ip").value.trim();
+    const updatedPort = parseInt(li.querySelector(".edit-port").value.trim(), 10);
+    if (isNaN(updatedPort) || updatedPort < 1024 || updatedPort > 65535) {
+      showAlert("Port must be a number between 1024 and 65535.", "warning", true);
+      await loadPiList();
+      return;
+    }
 
     if (!updatedName || !updatedIp) {
       showAlert("Both fields are required to save.", "warning", true);
@@ -83,7 +90,7 @@ function handleEditMode(li, pi) {
 
     let apiReachable = false;
     try {
-      const fanCheck = await fetchWithTimeout(`http://${updatedIp}:10000/status`, { timeout: 2000 });
+      const fanCheck = await fetchWithTimeout(`http://${updatedIp}:${updatedPort}/status`, { timeout: 2000 });
       if (!fanCheck.ok) {
         li.classList.add("bg-warning-subtle", "text-dark");
       } else {
@@ -94,7 +101,7 @@ function handleEditMode(li, pi) {
       li.classList.add("bg-warning-subtle", "text-dark");
     }
 
-    const updatedPi = { name: updatedName, ip: updatedIp };
+    const updatedPi = { name: updatedName, ip: updatedIp, port: updatedPort };
 
     try {
       await editPi(pi.ip, updatedPi);
@@ -226,6 +233,16 @@ async function addPi() {
 
   const name = nameInput.value.trim();
   const ip = ipInput.value.trim();
+  const portInputVal = document.getElementById("piPortInput").value.trim();
+  if (!portInputVal) {
+    showAlert("Please enter a port number.", "warning", true);
+    return;
+  }
+  const port = parseInt(portInputVal, 10);
+  if (isNaN(port) || port < 1024 || port > 65535) {
+    showAlert("Port must be a number between 1024 and 65535.", "warning", true);
+    return;
+  }
 
   // Clear and hide alert initially
   clearAlert();
@@ -247,7 +264,7 @@ async function addPi() {
   // Check if the fan API is reachable
   let apiReachable = false;
   try {
-    const fanCheck = await fetchWithTimeout(`http://${ip}:10000/status`, { timeout: 2000 });
+    const fanCheck = await fetchWithTimeout(`http://${ip}:${port}/status`, { timeout: 2000 });
     if (fanCheck.ok) {
       apiReachable = true;
     } else {
@@ -262,7 +279,7 @@ async function addPi() {
     const response = await fetch(`http://${window.location.hostname}:${flaskPort}/add_pi`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, ip })
+      body: JSON.stringify({ name, ip, port })
     });
 
     if (response.status === 409) {
@@ -275,6 +292,7 @@ async function addPi() {
     // Clear inputs
     nameInput.value = "";
     ipInput.value = "";
+    document.getElementById("piPortInput").value = "";
 
     // Show success or warning
     if (apiReachable) {
@@ -391,7 +409,7 @@ async function fetchStatus(pi) {
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 2000);
-    const response = await fetch(`http://${pi.ip}:10000/status`, { signal: controller.signal });
+    const response = await fetch(`http://${pi.ip}:${pi.port}/status`, { signal: controller.signal });
     clearTimeout(timeout);
     if (!response.ok) throw new Error("HTTP error");
     const data = await response.json();

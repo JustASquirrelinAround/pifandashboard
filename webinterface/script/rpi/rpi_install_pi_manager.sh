@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 PORT="${1:-10001}"
@@ -58,8 +57,12 @@ def get_pi_list():
 def add_pi():
     try:
         new_pi = request.get_json()
-        if not new_pi.get("name") or not new_pi.get("ip"):
-            return jsonify({"error": "Missing 'name' or 'ip'"}), 400
+        if not new_pi.get("name") or not new_pi.get("ip") or not new_pi.get("port"):
+            return jsonify({"error": "Missing 'name' or 'ip' or 'port'"}), 400
+        try:
+            new_pi["port"] = int(new_pi["port"])
+        except ValueError:
+            return jsonify({"error": "Port must be an integer"}), 400
 
         init_pi_list()
         pis = load_pi_list()
@@ -99,7 +102,7 @@ def edit_pi():
         new_name = data.get("name")
         new_ip = data.get("ip")
 
-        if not original_ip or not new_name or not new_ip:
+        if not original_ip or not new_name or not new_ip or not data.get("port"):
             return jsonify({"error": "Missing required fields"}), 400
 
         init_pi_list()
@@ -110,6 +113,10 @@ def edit_pi():
             if pi["ip"] == original_ip:
                 pi["name"] = new_name
                 pi["ip"] = new_ip
+                try:
+                    pi["port"] = int(data["port"])
+                except ValueError:
+                    return jsonify({"error": "Port must be an integer"}), 400
                 found = True
                 break
 

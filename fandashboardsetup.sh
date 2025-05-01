@@ -329,6 +329,9 @@ if [ $? -eq 0 ]; then
 
       echo "[INFO] Syncing Web Dashboard to /var/www/fandashboard..."
       rsync -av "$HOME_DIR/webinterface/fandashboard/" /var/www/fandashboard/ 2>>"$INSTALL_LOG"
+
+      echo "[INFO] Setting port number for Pi Manager in script.js"
+      sed -i "s|^const flaskPort = .*;|const flaskPort = ${PI_MANAGER_PORT}; // Port of your Flask Pi Manager API|" /var/www/fandashboard/js/script.js
       
       echo "[INFO] Configuring Nginx default site..."
       NGINX_DEFAULT="/etc/nginx/sites-available/default"
