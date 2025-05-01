@@ -1,5 +1,7 @@
 #!/bin/bash
 
+PORT="${1:-10001}"
+
 # Check if the service already exists
 if [ -f /etc/systemd/system/pimanager.service ]; then
   echo "[INFO] pimanager.service already exists. Skipping installation."
@@ -9,7 +11,7 @@ fi
 echo "Creating Pi Manager Flask API script..."
 
 # Create the Python script in /mnt/dietpi_userdata
-cat << 'EOF' > /mnt/dietpi_userdata/pi_manager_api.py
+cat << EOF > /mnt/dietpi_userdata/pi_manager_api.py
 # pi_manager_api.py
 # Flask API for dynamically managing a list of Raspberry Pis for dashboard use.
 # Provides endpoints to read and update a JSON file with {name, ip} entries.
@@ -55,8 +57,12 @@ def get_pi_list():
 def add_pi():
     try:
         new_pi = request.get_json()
-        if not new_pi.get("name") or not new_pi.get("ip"):
-            return jsonify({"error": "Missing 'name' or 'ip'"}), 400
+        if not new_pi.get("name") or not new_pi.get("ip") or not new_pi.get("port"):
+            return jsonify({"error": "Missing 'name', 'ip', or 'port'"}), 400
+        try:
+            new_pi["port"] = int(new_pi["port"])
+        except ValueError:
+            return jsonify({"error": "Port must be an integer"}), 400
 
         init_pi_list()
         pis = load_pi_list()
@@ -96,8 +102,8 @@ def edit_pi():
         new_name = data.get("name")
         new_ip = data.get("ip")
 
-        if not original_ip or not new_name or not new_ip:
-            return jsonify({"error": "Missing required fields"}), 400
+        if not original_ip or not new_name or not new_ip or not data.get("port"):
+            return jsonify({"error": "Missing required fields: originalIp, name, ip, or port"}), 400
 
         init_pi_list()
         pis = load_pi_list()
@@ -107,6 +113,10 @@ def edit_pi():
             if pi["ip"] == original_ip:
                 pi["name"] = new_name
                 pi["ip"] = new_ip
+                try:
+                    pi["port"] = int(data["port"])
+                except ValueError:
+                    return jsonify({"error": "Port must be an integer"}), 400
                 found = True
                 break
 
@@ -121,7 +131,7 @@ def edit_pi():
 # Run the app
 if __name__ == "__main__":
     init_pi_list()
-    app.run(host="0.0.0.0", port=10001)
+    app.run(host="0.0.0.0", port=${PORT})
 EOF
 
 chmod +x /mnt/dietpi_userdata/pi_manager_api.py
@@ -151,4 +161,4 @@ systemctl enable pimanager.service
 systemctl start pimanager.service
 
 echo ""
-echo "Pi Manager Flask API is now running on port 10001"
+echo "Pi Manager Flask API is now running on port ${PORT}"

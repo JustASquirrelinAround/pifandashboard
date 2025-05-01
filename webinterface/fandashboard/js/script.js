@@ -16,10 +16,42 @@
   License: MIT
 */
 
-const flaskPort = 10001; // Port of your Flask Pi Manager API
+const flaskPort = ${PI_MANAGER_PORT}; // Port of your Flask Pi Manager API
 let pis = []; // Global list for dashboard + modal
 let justAddedOfflineIp = null;
 let currentlyEditingItem = null;
+
+// Auto-format IPv4 input: inserts dots after up to 3 digits per octet and restricts input, enforces 0-255 per octet and tracks previous value for correct dot handling
+function formatIpInput(evt) {
+  const input = evt.target;
+  const prev = input.dataset.prevIp || '';
+  // Remove non-digits/dots
+  let v = input.value.replace(/[^\d.]/g, '');
+  // Split into up to 4 parts
+  let parts = v.split('.');
+  parts = parts.slice(0, 4).map(p => {
+    // Limit to 3 chars
+    p = p.slice(0, 3);
+    // Enforce numeric 0-255
+    const num = parseInt(p, 10);
+    if (!isNaN(num)) {
+      return Math.min(num, 255).toString();
+    }
+    return p;
+  });
+  // Rebuild
+  let formatted = parts.join('.');
+  // Auto-insert dot on insertion when an octet reaches 3 digits
+  if (v.length > prev.length) {
+    const last = parts[parts.length - 1];
+    if (last.length === 3 && parts.length < 4 && !formatted.endsWith('.')) {
+      formatted += '.';
+    }
+  }
+  // Update value and store
+  input.value = formatted;
+  input.dataset.prevIp = formatted;
+}
 
 // Load from Flask JSON endpoint
 async function loadPiList() {
@@ -42,12 +74,13 @@ function handleEditMode(li, pi) {
     if (cancelBtn) cancelBtn.click();
   }
   currentlyEditingItem = li;
-  // Create input fields pre-filled with current values
+  // Create input fields pre-filled with current values (name, ip, port)
   li.innerHTML = `
   <div class="d-flex flex-wrap justify-content-between w-100 align-items-center">
     <div class="d-flex gap-1">
-      <input type="text" class="form-control form-control-sm edit-name flex-grow-1" style="max-width: 250px;" value="${pi.name}" />
-      <input type="text" class="form-control form-control-sm edit-ip flex-grow-1" style="max-width: 250px;" value="${pi.ip}" />
+      <input type="text" class="form-control form-control-sm edit-name flex-grow-1" style="max-width: 200px;" value="${pi.name}" />
+      <input type="text" class="form-control form-control-sm edit-ip flex-grow-1" style="max-width: 200px;" value="${pi.ip}" />
+      <input type="number" class="form-control form-control-sm edit-port flex-grow-1" style="max-width: 100px;" min="1024" max="65535" value="${pi.port}" />
     </div>
     <div>
       <button class="btn btn-sm btn-success save-btn">
@@ -59,10 +92,22 @@ function handleEditMode(li, pi) {
     </div>
   </div>
 `;
+  // Attach auto-format to the cloned IP input and initialize prevIp
+  const editIpEl = li.querySelector(".edit-ip");
+  if (editIpEl) {
+    editIpEl.dataset.prevIp = pi.ip;
+    editIpEl.addEventListener("input", formatIpInput);
+  }
 
   li.querySelector(".save-btn").addEventListener("click", async () => {
     const updatedName = li.querySelector(".edit-name").value.trim();
     const updatedIp = li.querySelector(".edit-ip").value.trim();
+    const updatedPort = parseInt(li.querySelector(".edit-port").value.trim(), 10);
+    if (isNaN(updatedPort) || updatedPort < 1024 || updatedPort > 65535) {
+      showAlert("Port must be a number between 1024 and 65535.", "warning", true);
+      await loadPiList();
+      return;
+    }
 
     if (!updatedName || !updatedIp) {
       showAlert("Both fields are required to save.", "warning", true);
@@ -83,7 +128,7 @@ function handleEditMode(li, pi) {
 
     let apiReachable = false;
     try {
-      const fanCheck = await fetchWithTimeout(`http://${updatedIp}:10000/status`, { timeout: 2000 });
+      const fanCheck = await fetchWithTimeout(`http://${updatedIp}:${updatedPort}/status`, { timeout: 2000 });
       if (!fanCheck.ok) {
         li.classList.add("bg-warning-subtle", "text-dark");
       } else {
@@ -94,7 +139,7 @@ function handleEditMode(li, pi) {
       li.classList.add("bg-warning-subtle", "text-dark");
     }
 
-    const updatedPi = { name: updatedName, ip: updatedIp };
+    const updatedPi = { name: updatedName, ip: updatedIp, port: updatedPort };
 
     try {
       await editPi(pi.ip, updatedPi);
@@ -124,7 +169,7 @@ function handleEditMode(li, pi) {
   li.querySelector(".cancel-btn").addEventListener("click", () => {
     currentlyEditingItem = null;
     li.innerHTML = `
-      <span><strong>${pi.name}</strong> (${pi.ip})</span>
+      <span><strong>${pi.name}</strong> (${pi.ip}:${pi.port})</span>
       <div>
         <button class="btn btn-sm btn-primary edit-btn" data-ip="${pi.ip}">
           <i class="bi bi-pencil"></i>
@@ -179,7 +224,7 @@ function renderPiList() {
 
     // Set up the list item with Pi info and Edit/Delete buttons
     item.innerHTML = `
-      <span><strong>${pi.name}</strong> (${pi.ip})</span>
+      <span><strong>${pi.name}</strong> (${pi.ip}:${pi.port})</span>
       <div>
         <button class="btn btn-sm btn-primary edit-btn" data-ip="${pi.ip}">
           <i class="bi bi-pencil"></i>
@@ -220,18 +265,40 @@ async function fetchWithTimeout(resource, { timeout = 2000, ...options } = {}) {
 
 // Main Add Pi function
 async function addPi() {
+  // Clear any previous alerts
+  clearAlert();
   const nameInput = document.getElementById("piNameInput");
   const ipInput = document.getElementById("piIpInput");
   const alertBox = document.getElementById("piAlert");
 
   const name = nameInput.value.trim();
   const ip = ipInput.value.trim();
+  const portInputVal = document.getElementById("piPortInput").value.trim();
 
-  // Clear and hide alert initially
-  clearAlert();
+  // Check for missing fields
+  const missing = [];
+  if (!name) missing.push("name");
+  if (!ip) missing.push("IP");
+  if (!portInputVal) missing.push("port");
+  if (missing.length) {
+    // Build a human-readable, bolded list of missing fields
+    const bolded = missing.map(item => `<strong>${item}</strong>`);
+    let listStr;
+    if (bolded.length === 1) {
+      listStr = bolded[0];
+    } else if (bolded.length === 2) {
+      listStr = `${bolded[0]} and ${bolded[1]}`;
+    } else {
+      listStr = `${bolded.slice(0, -1).join(', ')}, and ${bolded.slice(-1)}`;
+    }
+    showAlert(`Please enter ${listStr}.`, "warning", true);
+    return;
+  }
 
-  if (!name || !ip) {
-    showAlert("Please enter both a name and IP address.", "warning", true);
+  // Validate port number
+  const port = parseInt(portInputVal, 10);
+  if (isNaN(port) || port < 1024 || port > 65535) {
+    showAlert("Port must be a number between 1024 and 65535.", "warning", true);
     return;
   }
 
@@ -247,7 +314,7 @@ async function addPi() {
   // Check if the fan API is reachable
   let apiReachable = false;
   try {
-    const fanCheck = await fetchWithTimeout(`http://${ip}:10000/status`, { timeout: 2000 });
+    const fanCheck = await fetchWithTimeout(`http://${ip}:${port}/status`, { timeout: 2000 });
     if (fanCheck.ok) {
       apiReachable = true;
     } else {
@@ -262,7 +329,7 @@ async function addPi() {
     const response = await fetch(`http://${window.location.hostname}:${flaskPort}/add_pi`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, ip })
+      body: JSON.stringify({ name, ip, port })
     });
 
     if (response.status === 409) {
@@ -275,6 +342,7 @@ async function addPi() {
     // Clear inputs
     nameInput.value = "";
     ipInput.value = "";
+    document.getElementById("piPortInput").value = "";
 
     // Show success or warning
     if (apiReachable) {
@@ -304,7 +372,7 @@ function showAlert(message, type = "success", persistent = false) {
   // Set content and styling
   alertBox.className = `alert alert-${type} fade show mt-2`;
   alertBox.innerHTML = persistent
-    ? `${message} <button type="button" class="btn-close float-end" data-bs-dismiss="alert" aria-label="Close"></button>`
+    ? `${message} <button type="button" class="btn-close float-end" onclick="clearAlert()" aria-label="Close"></button>`
     : message;
 
   alertBox.classList.remove("d-none");
@@ -391,7 +459,7 @@ async function fetchStatus(pi) {
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 2000);
-    const response = await fetch(`http://${pi.ip}:10000/status`, { signal: controller.signal });
+    const response = await fetch(`http://${pi.ip}:${pi.port}/status`, { signal: controller.signal });
     clearTimeout(timeout);
     if (!response.ok) throw new Error("HTTP error");
     const data = await response.json();
@@ -595,7 +663,7 @@ function createCard(pi) {
             <i class="bi bi-motherboard"></i> ${pi.name}
           </h5>
           <div>
-            <span class="badge bg-dark text-white"><i class="bi bi-hdd-network me-1"></i>${pi.ip}</span>
+            <span class="badge bg-dark text-white"><i class="bi bi-hdd-network me-1"></i>${pi.ip}:${pi.port}</span>
             ${statusDot}
           </div>
         </div>
@@ -610,7 +678,7 @@ function createCard(pi) {
             </button>
           </h5>
           <div>
-            <span class="badge bg-dark text-white"><i class="bi bi-hdd-network me-1"></i>${pi.ip}</span>
+            <span class="badge bg-dark text-white"><i class="bi bi-hdd-network me-1"></i>${pi.ip}:${pi.port}</span>
             ${statusDot}
           </div>
         </div>
@@ -746,4 +814,10 @@ window.addEventListener("DOMContentLoaded", async () => {
   startCountdown();
   updateCountdownDisplay();
   applyCardLayout();
+  const addIpInput = document.getElementById("piIpInput");
+  if (addIpInput) {
+    addIpInput.value = '';
+    addIpInput.dataset.prevIp = '';
+    addIpInput.addEventListener("input", formatIpInput);
+  }
 });

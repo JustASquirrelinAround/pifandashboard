@@ -1,5 +1,7 @@
 #!/bin/bash
 
+PORT="${1:-10000}"
+
 # Check if the service already exists
 if [ -f /etc/systemd/system/fanapi.service ]; then
   echo "[INFO] fanapi.service already exists. Skipping installation."
@@ -15,7 +17,7 @@ pip install --upgrade pip
 pip install flask flask-cors psutil
 
 # Create the Python script that runs the Flask API on each Pi
-cat << 'EOF' > $HOME/pifandashboard/fan_status_api.py
+cat << EOF > $HOME/pifandashboard/fan_status_api.py
 # fan_status_api.py
 # -----------------
 # A lightweight Flask API that serves real-time CPU temperature, fan speed,
@@ -73,7 +75,7 @@ def status():
 
 # Run the Flask app on all network interfaces, port 10000
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    app.run(host="0.0.0.0", port=${PORT})
 EOF
 
 # Make sure the script is executable

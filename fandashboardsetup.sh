@@ -61,6 +61,116 @@ while [ "$confirmed" = false ]; do
     fi
   fi
 
+  # === Port Selection ===
+  is_port_in_use() {
+    ss -ltn | awk '{print $4}' | grep -q ":$1$"
+  }
+  DEFAULT_FAN_PORT=10000
+  DEFAULT_PI_PORT=10001
+
+  if ! is_port_in_use $DEFAULT_FAN_PORT && ! is_port_in_use $DEFAULT_PI_PORT; then
+    PORT_CHOICE=$(whiptail --title "Port Selection" --menu \
+      "Default ports $DEFAULT_FAN_PORT (fan API) and $DEFAULT_PI_PORT (PI manager) are available. Choose:" \
+      15 60 2 \
+      "default" "Use default ports" \
+      "custom"  "Enter custom ports" 3>&1 1>&2 2>&3)
+
+    if [ "$PORT_CHOICE" = "default" ]; then
+      FAN_API_PORT=$DEFAULT_FAN_PORT
+      PI_MANAGER_PORT=$DEFAULT_PI_PORT
+    else
+      while true; do
+        FAN_API_PORT=$(whiptail --inputbox "Enter Fan API port (1024-65535):" 10 60 "$DEFAULT_FAN_PORT" 3>&1 1>&2 2>&3)
+        if [ $? -ne 0 ]; then
+          echo "[INFO] Port entry cancelled, restarting setup..."
+          confirmed=false
+          continue 2
+        fi
+        PI_MANAGER_PORT=$(whiptail --inputbox "Enter PI Manager API port (1024-65535):" 10 60 "$DEFAULT_PI_PORT" 3>&1 1>&2 2>&3)
+        if [ $? -ne 0 ]; then
+          echo "[INFO] Port entry cancelled, restarting setup..."
+          confirmed=false
+          continue 2
+        fi
+        if [[ ! $FAN_API_PORT =~ ^[0-9]+$ ]] || [[ ! $PI_MANAGER_PORT =~ ^[0-9]+$ ]]; then
+          whiptail --msgbox "Ports must be numeric." 8 40
+          continue
+        fi
+        if [ $FAN_API_PORT -lt 1024 ] || [ $FAN_API_PORT -gt 65535 ] || \
+           [ $PI_MANAGER_PORT -lt 1024 ] || [ $PI_MANAGER_PORT -gt 65535 ]; then
+          whiptail --msgbox "Ports must be between 1024 and 65535." 8 50
+          continue
+        fi
+        if is_port_in_use $FAN_API_PORT || is_port_in_use $PI_MANAGER_PORT; then
+          MSG="Port status:\n"
+          if is_port_in_use $FAN_API_PORT; then
+            MSG="$MSG -> Fan API Port ($FAN_API_PORT) (in use)\n"
+          else
+            MSG="$MSG    Fan API Port ($FAN_API_PORT) (available)\n"
+          fi
+          if is_port_in_use $PI_MANAGER_PORT; then
+            MSG="$MSG -> PI Manager Port ($PI_MANAGER_PORT) (in use)\n"
+          else
+            MSG="$MSG    PI Manager Port ($PI_MANAGER_PORT) (available)\n"
+          fi
+          whiptail --msgbox "$(echo -e "$MSG\nChoose different ports.")" 12 60
+          continue
+        fi
+        break
+      done
+    fi
+  else
+    MSG="Default port status:\n"
+    if is_port_in_use $DEFAULT_FAN_PORT; then
+      MSG="$MSG -> Fan API Port ($DEFAULT_FAN_PORT) (in use)\n"
+    else
+      MSG="$MSG    Fan API Port ($DEFAULT_FAN_PORT) (available)\n"
+    fi
+    if is_port_in_use $DEFAULT_PI_PORT; then
+      MSG="$MSG -> PI Manager Port ($DEFAULT_PI_PORT) (in use)\n"
+    else
+      MSG="$MSG    PI Manager Port ($DEFAULT_PI_PORT) (available)\n"
+    fi
+    whiptail --msgbox "$(echo -e "$MSG\nPlease enter custom ports.")" 12 60
+    while true; do
+      FAN_API_PORT=$(whiptail --inputbox "Enter Fan API port (1024-65535):" 10 60 "" 3>&1 1>&2 2>&3)
+      if [ $? -ne 0 ]; then
+        echo "[INFO] Port entry cancelled, restarting setup..."
+        confirmed=false
+        continue 2
+      fi
+      PI_MANAGER_PORT=$(whiptail --inputbox "Enter PI Manager API port (1024-65535):" 10 60 "" 3>&1 1>&2 2>&3)
+      if [ $? -ne 0 ]; then
+        echo "[INFO] Port entry cancelled, restarting setup..."
+        confirmed=false
+        continue 2
+      fi
+      if [[ ! $FAN_API_PORT =~ ^[0-9]+$ ]] || [[ ! $PI_MANAGER_PORT =~ ^[0-9]+$ ]]; then
+        whiptail --msgbox "Ports must be numeric." 8 40; continue
+      fi
+      if [ $FAN_API_PORT -lt 1024 ] || [ $FAN_API_PORT -gt 65535 ] || \
+         [ $PI_MANAGER_PORT -lt 1024 ] || [ $PI_MANAGER_PORT -gt 65535 ]; then
+        whiptail --msgbox "Ports must be between 1024 and 65535." 8 50; continue
+      fi
+      if is_port_in_use $FAN_API_PORT || is_port_in_use $PI_MANAGER_PORT; then
+        MSG="Port status:\n"
+        if is_port_in_use $FAN_API_PORT; then
+          MSG="$MSG -> Fan API Port ($FAN_API_PORT) (in use)\n"
+        else
+          MSG="$MSG    Fan API Port ($FAN_API_PORT) (available)\n"
+        fi
+        if is_port_in_use $PI_MANAGER_PORT; then
+          MSG="$MSG -> PI Manager Port ($PI_MANAGER_PORT) (in use)\n"
+        else
+          MSG="$MSG    PI Manager Port ($PI_MANAGER_PORT) (available)\n"
+        fi
+        whiptail --msgbox "$(echo -e "$MSG\nChoose different ports.")" 12 60
+        continue
+      fi
+      break
+    done
+  fi
+
   # === Summary of Selections ===
   SUMMARY="You selected:\n\nRole: $ROLE\nOS: $OS"
   if [ "$OS" == "rpi" ]; then
@@ -70,6 +180,7 @@ while [ "$confirmed" = false ]; do
       SUMMARY="$SUMMARY\nVENV: NO (Standard Install)"
     fi
   fi
+  SUMMARY="$SUMMARY\nFan API Port: $FAN_API_PORT\nPI Manager Port: $PI_MANAGER_PORT"
 
   SUMMARY="$SUMMARY\n\nDo you want to continue and pull the required files?"
 
@@ -145,14 +256,14 @@ if [ $? -eq 0 ]; then
     if [[ "$ROLE" == "fanonly" || "$ROLE" == "mainpi" ]]; then
       if [ "$OS" == "dietpi" ]; then
         bash "$HOME_DIR/fanscripts/dietpi/dietpi_install_fan_control.sh" 2>>"$INSTALL_LOG"
-        bash "$HOME_DIR/fanscripts/dietpi/dietpi_install_fan_api.sh" 2>>"$INSTALL_LOG"
+        bash "$HOME_DIR/fanscripts/dietpi/dietpi_install_fan_api.sh" "$FAN_API_PORT" 2>>"$INSTALL_LOG"
       else
         if [ "$USE_VENV" == true ]; then
           bash "$HOME_DIR/fanscripts/rpi/venv/rpi_install_fan_control_venv.sh" 2>>"$INSTALL_LOG"
-          bash "$HOME_DIR/fanscripts/rpi/venv/rpi_install_fan_api_venv.sh" 2>>"$INSTALL_LOG"
+          bash "$HOME_DIR/fanscripts/rpi/venv/rpi_install_fan_api_venv.sh" "$FAN_API_PORT" 2>>"$INSTALL_LOG"
         else
           bash "$HOME_DIR/fanscripts/rpi/rpi_install_fan_control.sh" 2>>"$INSTALL_LOG"
-          bash "$HOME_DIR/fanscripts/rpi/rpi_install_fan_api.sh" 2>>"$INSTALL_LOG"
+          bash "$HOME_DIR/fanscripts/rpi/rpi_install_fan_api.sh" "$FAN_API_PORT" 2>>"$INSTALL_LOG"
         fi
       fi
     fi
@@ -218,6 +329,9 @@ if [ $? -eq 0 ]; then
 
       echo "[INFO] Syncing Web Dashboard to /var/www/fandashboard..."
       rsync -av "$HOME_DIR/webinterface/fandashboard/" /var/www/fandashboard/ 2>>"$INSTALL_LOG"
+
+      echo "[INFO] Setting port number for Pi Manager in script.js"
+      sed -i "s|^const flaskPort = .*;|const flaskPort = ${PI_MANAGER_PORT}; // Port of your Flask Pi Manager API|" /var/www/fandashboard/js/script.js
       
       echo "[INFO] Configuring Nginx default site..."
       NGINX_DEFAULT="/etc/nginx/sites-available/default"
@@ -231,12 +345,12 @@ if [ $? -eq 0 ]; then
       fi
 
       if [ "$OS" == "dietpi" ]; then
-        bash "$HOME_DIR/webinterface/script/dietpi/dietpi_install_pi_manager.sh" 2>>"$INSTALL_LOG"
+        bash "$HOME_DIR/webinterface/script/dietpi/dietpi_install_pi_manager.sh" "$PI_MANAGER_PORT" 2>>"$INSTALL_LOG"
       else
         if [ "$USE_VENV" == true ]; then
-          bash "$HOME_DIR/webinterface/script/rpi/venv/rpi_install_pi_manager_venv.sh" 2>>"$INSTALL_LOG"
+          bash "$HOME_DIR/webinterface/script/rpi/venv/rpi_install_pi_manager_venv.sh" "$PI_MANAGER_PORT" 2>>"$INSTALL_LOG"
         else
-          bash "$HOME_DIR/webinterface/script/rpi/rpi_install_pi_manager.sh" 2>>"$INSTALL_LOG"
+          bash "$HOME_DIR/webinterface/script/rpi/rpi_install_pi_manager.sh" "$PI_MANAGER_PORT" 2>>"$INSTALL_LOG"
         fi
       fi
     fi
